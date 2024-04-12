@@ -3,6 +3,7 @@ from mesa.time import RandomActivation
 import mesa
 import matplotlib.pyplot as plt
 import seaborn as sns # Data visualization tools.
+import pandas as pd
 
 class FishAgent(Agent):
     def __init__(self, unique_id, model):
@@ -45,9 +46,10 @@ class FishModel(Model):
         self.num_fish = num_fish
         self.num_fishers = num_fishers
         self.fish_death_rate = 0.1
-        self.fish_price = 10
-        self.bank_fee = 100
+        self.fish_price = 1
+        self.bank_fee = 10
         self.fish_agents = {}  # 存储鱼代理的字典
+        self.running = True
 
         for i in range(self.num_fish):
             fish_agent = FishAgent(i, self)
@@ -71,9 +73,9 @@ class FishModel(Model):
     def step(self):
         self.schedule.step()
         self.datacollector.collect(self)
-        print(f"Fish: {len(self.fish_agents)}")
-        print(f"Fishers: {self.num_fishers}")
-        print(f"Bank: {self.bank_agent.money}")
+        # print(f"Fish: {len(self.fish_agents)}")
+        # print(f"Fishers: {self.num_fishers}")
+        # print(f"Bank: {self.bank_agent.money}")
 
 model = FishModel(100, 3)
 for i in range(10):
@@ -90,3 +92,32 @@ plt.ylabel("Count/Money")
 plt.title("Simulation Results")
 plt.legend()
 plt.show()
+
+
+# params = {"num_fish": range(50, 500, 50), "num_fishers": range(1, 5, 1)}
+#
+# results = mesa.batch_run(
+#     FishModel,
+#     parameters=params,
+#     iterations=1,
+#     max_steps=200,
+#     number_processes=1,
+#     data_collection_period=1,
+#     display_progress=True,
+# )
+#
+# results_df = pd.DataFrame(results)
+# print(results_df.keys())
+
+
+
+
+
+
+
+
+
+
+
+
+
