@@ -34,26 +34,29 @@ def lotka_volterra_model2(params):
 
 
 class FishingModel(mesa.Model):
-    def __init__(self, N1, N2, width, height):
+    def __init__(self, num_fish, num_fisher, width, height):
         super().__init__()
-        self.num_fish = N1
-        self.num_fisher = N2
+        self.num_fish = num_fish
+        self.num_fisher = num_fisher
         self.grid = mesa.space.MultiGrid(width, height, True)
-        self.schedule = mesa.time.RandomActivation(self)
+        self.schedule = mesa.time.BaseScheduler(self)
         self.running = True
 
-        for i in range(self.num_agents):
+        for i in range(self.num_fish):
             a = BluefinTunaAgent(i, self)
-
             self.schedule.add(a)
-            # Add the agent to a random grid cell
-            x = self.random.randrange(self.grid.width)
-            y = self.random.randrange(self.grid.height)
-            self.grid.place_agent(a, (x, y))
+        for i in range(self.num_fisher):
+            a = FisherFolkAgent(i, self)
+            self.schedule.add(a)
+        a = BankAgent(1, self)
+        self.schedule.add(a)
 
-        self.datacollector = mesa.DataCollector(
-            model_reporters={"Gini": compute_gini},
-            agent_reporters={"Wealth": "wealth", "Steps_not_given": "steps_not_given"},
+        self.datacollector = mesa.DataCollector(  # 创建 DataCollector 对象
+            model_reporters={
+                "Fish": lambda m: len(m.fish_agents),
+                "Fishers": lambda m: m.num_fishers,
+                "Bank Money": lambda m: m.bank_agent.money
+            }
         )
 
     def step(self):
@@ -63,17 +66,18 @@ class FishingModel(mesa.Model):
 
 
 class BluefinTunaAgent(mesa.Agent):
-    def __init__(self, unique_id, catch_speed, model):
+    def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
-        self.speed = 2
-        self.alive = 1
+        self.alive = 1 # 1: alive, 0: dead
+        self.gender = random.randint(1,2) # male = 1, female = 2
+        self.pregnant = 0 # age constructure, gender constructure
+        self.born = 0
+        self.age = 0
+        self.nature_death_rate = 0.01
 
-    def move(self):
-        possible_steps = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        new_position = self.random.choice(possible_steps)
-        self.model.grid.move_agent(self, new_position)
+    def nature_death(self):
+        if random.random() < self.nature_death_rate:
+            self.alive = 0
 
 
 class FisherFolkAgent(mesa.Agent):
@@ -81,26 +85,21 @@ class FisherFolkAgent(mesa.Agent):
         super().__init__(unique_id, model)
         self.wealth = 0
         self.alive = 1
-        self.catch_speed = catch_speed  # [0-10]
+        # self.catch_speed = catch_speed  # [0-10]
         self.increase_ratio_per_year = 0.1
+        self.fish_store = 0
 
-    def move(self):
-        possible_steps = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        new_position = self.random.choice(possible_steps)
-        self.model.grid.move_agent(self, new_position)
+    def catch(self, catch_num):
+        self.fish_store += catch_num
 
-
-class WeatherAgent(mesa.Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.weather = 0  # {0: snow, 1: rain, 2: sun}
-
-    def step(self):
-        self.weather = random.choice([0,1,2])
-        return self.weather
-
+# class WeatherAgent(mesa.Agent):
+#     def __init__(self, unique_id, model):
+#         super().__init__(unique_id, model)
+#         self.weather = 0  # {0: snow, 1: rain, 2: sun}
+#
+#     def step(self):
+#         self.weather = random.choice([0,1,2])
+#         return self.weather
 
 class BankAgent(mesa.Agent):
     def __init__(self, unique_id, model):
