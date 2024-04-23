@@ -2,13 +2,17 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial
 
 import sys
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QPainter
+from PySide6.QtCore import Qt, Slot, QPointF
+from PySide6.QtGui import QPainter, QGradient, QPen
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QHBoxLayout, QLineEdit, QMainWindow,
                                QPushButton, QTableWidget, QTableWidgetItem,
-                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox)
-from PySide6.QtCharts import QChartView, QPieSeries, QChart
+                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider)
+from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
+import networkx as nx
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import random
 
 
 class Widget(QWidget):
@@ -50,9 +54,19 @@ class Widget(QWidget):
         self.clear = QPushButton("Clear")
         self.plot = QPushButton("Plot")
 
+        self.slider = QSlider(Qt.Horizontal)
+        # self.slider.setRange(0, 1000)
+        self.slider.setVisible(False)
+
         # Chart
-        self.chart_view = QChartView()
-        self.chart_view.setRenderHint(QPainter.Antialiasing)
+        self.barchart = QChartView()
+        self.barchart.setRenderHint(QPainter.Antialiasing)
+
+        self.boxchart = QChartView()
+        self.boxchart.setRenderHint(QPainter.Antialiasing)
+
+        self.linechart = QChartView()
+        self.linechart.setRenderHint(QPainter.Antialiasing)
 
         self.submit.setEnabled(True)
 
@@ -83,17 +97,25 @@ class Widget(QWidget):
         self.right.addWidget(self.submit)
         self.right.addWidget(self.plot)
         self.right.addWidget(self.clear)
-        self.right.addWidget(self.chart_view)
+        self.right.addWidget(self.barchart)
+        self.right.addWidget(self.slider)
+
+        # right 2 panel
+        self.right2 = QVBoxLayout()
+        self.right2.addWidget(self.boxchart)
+        self.right2.addWidget(self.linechart)
 
         # main
         self.layout = QHBoxLayout(self)
         self.layout.addLayout(self.left)
         self.layout.addLayout(self.right)
+        self.layout.addLayout(self.right2)
 
         # Signals and Slots
         self.submit.clicked.connect(self.add_element)
         self.clear.clicked.connect(self.clear_table)
         self.plot.clicked.connect(self.plot_data)
+        self.slider.valueChanged.connect(self.update_piechart)
         self.name.textChanged.connect(self.check_disable)
         self.survival_rate.textChanged.connect(self.check_disable)
         self.fecundity.textChanged.connect(self.check_disable)
@@ -113,13 +135,14 @@ class Widget(QWidget):
     @Slot()
     def add_element(self):
         self.table.insertColumn(self.items)
-        self.table.setItem(0, self.items, QTableWidgetItem(self.name.text()))
-        self.table.setItem(1, self.items, QTableWidgetItem(self.survival_rate.text()))
-        self.table.setItem(2, self.items, QTableWidgetItem(self.fecundity.text()))
-        self.table.setItem(3, self.items, QTableWidgetItem(self.initial_population.text()))
-        self.table.setItem(4, self.items, QTableWidgetItem(self.growth_rate.text()))
-        self.table.setItem(5, self.items, QTableWidgetItem(self.carrying_capacity.text()))
-        self.table.setItem(6, self.items, QTableWidgetItem(self.natural_life_span.text()))
+        self.table.setItem(0, self.items, QTableWidgetItem(self.species.currentText()))
+        self.table.setItem(1, self.items, QTableWidgetItem(self.name.text()))
+        self.table.setItem(2, self.items, QTableWidgetItem(self.survival_rate.text()))
+        self.table.setItem(3, self.items, QTableWidgetItem(self.fecundity.text()))
+        self.table.setItem(4, self.items, QTableWidgetItem(self.initial_population.text()))
+        self.table.setItem(5, self.items, QTableWidgetItem(self.growth_rate.text()))
+        self.table.setItem(6, self.items, QTableWidgetItem(self.carrying_capacity.text()))
+        self.table.setItem(7, self.items, QTableWidgetItem(self.natural_life_span.text()))
         self.items += 1
 
 
@@ -128,7 +151,7 @@ class Widget(QWidget):
         self.reset_table()
 
     def reset_table(self):
-        self.table.setRowCount(7)
+        self.table.setRowCount(8)
         self.table.setColumnCount(0)
         self.table.setVerticalHeaderLabels(["name", "survival rate", "fecundity", "initial population", "growth rate", "carrying capacity", "natural life span"])
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -136,17 +159,122 @@ class Widget(QWidget):
 
     @Slot()
     def plot_data(self):
-        # Get table information
-        series = QPieSeries()
+        self.plot_piechart()
+        self.plot_boxplot()
+        self.plot_linechart()
+
+    def plot_piechart(self):
+        # pie chart
+        self.pieseries = QPieSeries()
         for i in range(self.table.columnCount()):
             text = self.table.item(0, i).text()
             number = float(self.table.item(3, i).text())
-            series.append(text, number)
+            self.pieseries.append(text, number)
 
+        self.piechart = QChart()
+        self.piechart.addSeries(self.pieseries)
+        self.piechart.legend().setAlignment(Qt.AlignLeft)
+        self.barchart.setChart(self.piechart)
+
+        self.slider.setVisible(True)
+        self.slider.setRange(0, self.table.columnCount())
+
+    def plot_boxplot(self):
+        # Box Plot
         chart = QChart()
+        series = QBoxPlotSeries()
+        series.setName("Box Plot")
+
+        data = [
+            [1, 2, 3, 4, 5],  # 数据集1
+            [3, 4, 5, 6, 7],  # 数据集2
+            [2, 3, 4, 5, 6],  # 数据集3
+        ]
+
+        for i, dataset in enumerate(data):
+            set_data = QBoxSet()
+            set_data.setValue(i, sum(dataset) / len(dataset))  # 使用平均值作为 y 坐标
+            series.append(set_data)
+
         chart.addSeries(series)
-        chart.legend().setAlignment(Qt.AlignLeft)
-        self.chart_view.setChart(chart)
+        chart.createDefaultAxes()
+
+        self.boxchart.setChart(chart)
+
+    def plot_linechart(self):
+        # Line Chart
+        chart = QChart()
+        series = QLineSeries()
+        series.setName("Line Chart")
+
+        data = [
+            (0, 1),
+            (1, 3),
+            (2, 4),
+            (3, 2),
+            (4, 5)
+        ]
+
+        for x, y in data:
+            series.append(x, y)
+
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+
+        # 设置线条样式
+        pen = QPen(Qt.blue)
+        pen.setWidth(2)
+        series.setPen(pen)
+
+        self.linechart.setChart(chart)
+
+    @Slot()
+    def update_piechart(self):
+
+        index = self.slider.value()
+        # x, y = self.table[index]
+        # series.replace(index, x, y)
+
+        self.pieseries.clear()
+        for i in range(index):
+            text = self.table.item(0, i).text()
+            number = float(self.table.item(3, i).text())
+            self.pieseries.append(text, number)
+
+        self.piechart.addSeries(self.pieseries)
+        self.piechart.legend().setAlignment(Qt.AlignLeft)
+        self.barchart.setChart(self.piechart)
+
+
+    def random_plot_linechart(self):
+        # Line Chart
+        chart = QChart()
+        series = QLineSeries()
+        series.setName("Line Chart")
+
+        data = [
+            (random.random(), random.random()),
+            (random.random(), random.random()),
+            (random.random(), random.random()),
+            (random.random(), random.random()),
+            (random.random(), random.random())
+        ]
+
+        for x, y in data:
+            series.append(x, y)
+
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+
+        # 设置线条样式
+        pen = QPen(Qt.blue)
+        pen.setWidth(2)
+        series.setPen(pen)
+
+        self.linechart.setChart(chart)
+
+
+
 
 class MainWindow(QMainWindow):
     def __init__(self, widget):
@@ -161,6 +289,13 @@ class MainWindow(QMainWindow):
         exit_action = self.file_menu.addAction("Exit", self.close)
         exit_action.setShortcut("Ctrl+Q")
 
+        # policy
+        self.file_menu = self.menu.addMenu("Policy")
+
+        # action = QAction("Update Data", window)
+        self.file_menu.addAction("Random Policy", widget.random_plot_linechart)
+        # action.triggered.connect(update_data)
+
         self.setCentralWidget(widget)
         self.setLayout(widget.layout)
 
@@ -172,7 +307,7 @@ if __name__ == "__main__":
     widget = Widget()
     # QMainWindow using QWidget as central widget
     window = MainWindow(widget)
-    window.resize(1000, 600)
+    window.resize(1500, 600)
     window.show()
 
     # Execute application
