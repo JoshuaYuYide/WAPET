@@ -1,12 +1,23 @@
 species_1:
-  name: " Bluefin_Tuna"
+  name: "Bluefin_Tuna"
   fecundity: 100000  # 繁殖率
   mortality: 0.1   # 死亡率
   initial_population: 1000  # 初期個体数
   carrying_capacity: 1000000  # 環境収容力
 
+species_2:
+  name: "whale"
+  fecundity: 100000  # 繁殖率
+  mortality: 0.1   # 死亡率
+  initial_population: 1000  # 初期個体数
+  carrying_capacity: 1000000  # 環境収容力
 
-
+species_3:
+  name: "whale"
+  fecundity: 100000  # 繁殖率
+  mortality: 0.1   # 死亡率
+  initial_population: 1000  # 初期個体数
+  carrying_capacity: 1000000  # 環境収容力
 
 
 
