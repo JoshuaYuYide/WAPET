@@ -51,6 +51,8 @@ class PanelInit:
 
         self.species = QComboBox()
         self.species.addItem("target species")
+        self.species.addItems("food species")
+        self.species.addItems("predator species")
 
         self.name = QLineEdit()
         self.name.setClearButtonEnabled(True)
@@ -76,6 +78,12 @@ class PanelInit:
         self.simulation_years = QLineEdit()
         self.simulation_years.setClearButtonEnabled(True)
         self.simulation_years.setText("10000")
+        self.feed_rate = QLineEdit()
+        self.feed_rate.setClearButtonEnabled(True)
+        self.feed_rate.setText("0.1")
+        self.preyed_rate = QLineEdit()
+        self.preyed_rate.setClearButtonEnabled(True)
+        self.preyed_rate.setText("0.1")
 
         self.species_submit = QPushButton("Submit")
         self.species_clear = QPushButton("Clear")
