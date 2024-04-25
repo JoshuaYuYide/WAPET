@@ -39,7 +39,13 @@ class PanelInit:
         font.setBold(True)
         self.left_environment_title.setFont(font)
 
-        self.left_specie_table_title = QLabel("Specie Data Table")
+        # self.left_specie_table_title = QLabel("Specie Data Table")
+        # self.left_specie_table_title.setAlignment(Qt.AlignCenter)
+        # font = self.left_specie_table_title.font()
+        # font.setBold(True)
+        # self.left_specie_table_title.setFont(font)
+
+        self.left_specie_table_title = QLabel("Extreme Environments")
         self.left_specie_table_title.setAlignment(Qt.AlignCenter)
         font = self.left_specie_table_title.font()
         font.setBold(True)
@@ -143,8 +149,8 @@ class PanelInit:
         self.env_operation.addWidget(self.env_cancel)
         self.env_operation.addWidget(self.env_op_random)
 
-        self.table = QTableWidget()
-        self.reset_table()
+        # self.table = QTableWidget()
+        # self.reset_table()
 
         self.left = QVBoxLayout()
         self.left.addWidget(self.left_specie_title)
@@ -153,8 +159,8 @@ class PanelInit:
         self.left.addWidget(self.left_environment_title)
         self.left.addLayout(self.env_data)
         self.left.addLayout(self.env_operation)
-        self.left.addWidget(self.left_specie_table_title)
-        self.left.addWidget(self.table)
+        # self.left.addWidget(self.left_specie_table_title)
+        # self.left.addWidget(self.table)
         return self.left
 
     def middle_panel(self):
