@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 from onespecie import OneSpecie
 from twospecies import TwoSpecies
+from artificialspecies import ArtificialSpecies
 
 if __name__ == "__main__":
     # Qt Application
@@ -21,10 +22,11 @@ if __name__ == "__main__":
     # Create bar graph
     one_specie = OneSpecie()
     two_species = TwoSpecies()
+    artificial_species = ArtificialSpecies()
 
     tabWidget.addTab(one_specie.get_widget(), "One Specie")
     tabWidget.addTab(two_species.get_widget(), "Two Species")
-    tabWidget.addTab(QWidget(), "Artificial Species")
+    tabWidget.addTab(artificial_species, "Artificial Species")
     tabWidget.addTab(QWidget(), "Policy Analysis")
 
     tabWidget.resize(minimum_size)

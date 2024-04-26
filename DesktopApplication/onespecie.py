@@ -25,7 +25,7 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check):
         self.layout = QHBoxLayout(self)
         self.layout.addLayout(self.leftmost_panel())
         self.layout.addLayout(self.left_panel())
-        self.layout.addLayout(self.middle_panel())
+        # self.layout.addLayout(self.middle_panel())
         self.layout.addLayout(self.right_panel())
 
         # Signals and Slots
