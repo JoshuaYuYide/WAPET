@@ -4,7 +4,7 @@ from PySide6.QtGui import QPainter, QGradient, QPen
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QHBoxLayout, QLineEdit, QMainWindow,
                                QPushButton, QTableWidget, QTableWidgetItem,
-                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu, QCheckBox, QTabWidget)
+                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 
 
@@ -13,40 +13,21 @@ class PanelInit:
         pass
 
     def leftmost_element(self):
-        self.species_table_title = QLabel("Species Data Table")
-        self.species_table_title.setAlignment(Qt.AlignCenter)
-        font = self.species_table_title.font()
+        self.leftmost_table_title = QLabel("Simulation Result Table")
+        self.leftmost_table_title.setAlignment(Qt.AlignCenter)
+        font = self.leftmost_table_title.font()
         font.setBold(True)
-        self.species_table_title.setFont(font)
-
-        self.result_table_title = QLabel("Simulation Result Table")
-        self.result_table_title.setAlignment(Qt.AlignCenter)
-        font = self.result_table_title.font()
-        font.setBold(True)
-        self.result_table_title.setFont(font)
-
-        self.species_table = QTableWidget()
-        self.reset_species_table()
+        self.leftmost_table_title.setFont(font)
 
         self.result_table = QTableWidget()
         self.reset_result_table()
 
+
     def leftmost_panel(self):
         self.leftmost_element()
-
-        self.species_table_widget = QWidget()
-        self.species_table_panel = QVBoxLayout(self.species_table_widget)
-        self.species_table_panel.addWidget(self.species_table_title)
-        self.species_table_panel.addWidget(self.species_table)
-
-        self.result_table_widget = QWidget()
-        self.result_table_panel = QVBoxLayout(self.result_table_widget)
-        self.result_table_panel.addWidget(self.result_table_title)
-        self.result_table_panel.addWidget(self.result_table)
-
-        self.leftmost = QTabWidget()
-        self.leftmost.addTab(self.species_table_widget, "Species Data Table")
-        self.leftmost.addTab(self.result_table_widget, "Simulation Result Table")
+        self.leftmost = QVBoxLayout()
+        self.leftmost.addWidget(self.leftmost_table_title)
+        self.leftmost.addWidget(self.result_table)
         return self.leftmost
 
     def left_element(self):
@@ -62,25 +43,19 @@ class PanelInit:
         font.setBold(True)
         self.left_environment_title.setFont(font)
 
-        self.extreme_title = QLabel("Extreme Environments")
-        self.extreme_title.setAlignment(Qt.AlignCenter)
-        font = self.extreme_title.font()
+        self.left_specie_table_title = QLabel("Specie Data Table")
+        self.left_specie_table_title.setAlignment(Qt.AlignCenter)
+        font = self.left_specie_table_title.font()
         font.setBold(True)
-        self.extreme_title.setFont(font)
-
-        self.operation_title = QLabel("Operation Panel")
-        self.operation_title.setAlignment(Qt.AlignCenter)
-        font = self.operation_title.font()
-        font.setBold(True)
-        self.operation_title.setFont(font)
+        self.left_specie_table_title.setFont(font)
 
         self.features = ["name", "survival rate", "fecundity", "initial_population", "growth_rate", "carrying_capacity",
                          "natural_life_span"]
 
         self.species = QComboBox()
         self.species.addItem("target species")
-        self.species.addItem("predator species")
-        self.species.addItem("prey species")
+        self.species.addItems("food species")
+        self.species.addItems("predator species")
 
         self.name = QLineEdit()
         self.name.setClearButtonEnabled(True)
@@ -106,6 +81,12 @@ class PanelInit:
         self.simulation_years = QLineEdit()
         self.simulation_years.setClearButtonEnabled(True)
         self.simulation_years.setText("10000")
+        self.feed_rate = QLineEdit()
+        self.feed_rate.setClearButtonEnabled(True)
+        self.feed_rate.setText("0.1")
+        self.preyed_rate = QLineEdit()
+        self.preyed_rate.setClearButtonEnabled(True)
+        self.preyed_rate.setText("0.1")
 
         self.species_submit = QPushButton("Submit")
         self.species_clear = QPushButton("Clear")
@@ -129,50 +110,12 @@ class PanelInit:
         self.env_submit = QPushButton("Submit")
         self.env_cancel = QPushButton("Cancel")
         self.env_op_random = QPushButton("Random")
-        self.env_random_seed = QLineEdit()
-        self.env_random_seed.setClearButtonEnabled(True)
-        self.env_random_seed.setText("0")
 
-        self.extreme_env_inf_ison = QCheckBox()
-        self.extreme_env_inf_ison.setText("Extreme Environment")
-        self.extreme_env_inf_ison.setChecked(False)
-        self.extreme_env_inf_food = QCheckBox()
-        self.extreme_env_inf_food.setText("Infinite Food")
-        self.extreme_env_inf_food.setChecked(False)
-        self.extreme_env_inf_food.setDisabled(True)
-        self.extreme_env_inf_dis = QCheckBox()
-        self.extreme_env_inf_dis.setText("Infinite Disease")
-        self.extreme_env_inf_dis.setChecked(False)
-        self.extreme_env_inf_dis.setDisabled(True)
-        self.extreme_env_no_food = QCheckBox()
-        self.extreme_env_no_food.setText("No Food")
-        self.extreme_env_no_food.setChecked(False)
-        self.extreme_env_no_food.setDisabled(True)
-        self.extreme_env_no_dis = QCheckBox()
-        self.extreme_env_no_dis.setText("No Disease")
-        self.extreme_env_no_dis.setChecked(False)
-        self.extreme_env_no_dis.setDisabled(True)
-        self.extreme_env_inf_carrying_capacity = QCheckBox()
-        self.extreme_env_inf_carrying_capacity.setText("Infinite Carrying Capacity")
-        self.extreme_env_inf_carrying_capacity.setChecked(False)
-        self.extreme_env_inf_carrying_capacity.setDisabled(True)
-
-        self.submit = QPushButton("Submit")
-        self.clear_table_bt = QPushButton("Clear Table")
-        self.clear_plot_bt = QPushButton("Clear Plot")
-        self.plot = QPushButton("Plot")
-        self.export_table = QPushButton("Export Table")
-        self.export_plot = QPushButton("Export Plot")
-
-        self.slider = QSlider(Qt.Horizontal)
-        # self.slider.setRange(0, 1000)
-        self.slider.setVisible(False)
-        self.slider_left = QLabel("0")
-        self.slider_right = QLabel("0")
-        self.slider_left.setVisible(False)
-        self.slider_right.setVisible(False)
+        self.table = QTableWidget()
+        self.reset_table()
 
     def left_panel(self):
+        # left layout
         self.left_element()
         # small layout construction
         self.sepcie = QGridLayout()
@@ -212,36 +155,10 @@ class PanelInit:
         self.env_data.addWidget(QLabel("simulation years:"), 3, 0)
         self.env_data.addWidget(self.simulation_years, 3, 1)
 
-        self.env_extreme = QGridLayout()
-        self.env_extreme.addWidget(self.extreme_env_inf_ison, 0, 0)
-        self.env_extreme.addWidget(self.extreme_env_inf_food, 0, 1)
-        self.env_extreme.addWidget(self.extreme_env_inf_dis, 0, 2)
-        self.env_extreme.addWidget(self.extreme_env_inf_carrying_capacity, 0, 3)
-        self.env_extreme.addWidget(self.extreme_env_no_food, 1, 1)
-        self.env_extreme.addWidget(self.extreme_env_no_dis, 1, 2)
-
-
         self.env_operation = QHBoxLayout()
         self.env_operation.addWidget(self.env_submit)
         self.env_operation.addWidget(self.env_cancel)
         self.env_operation.addWidget(self.env_op_random)
-        self.env_operation.addWidget(QLabel("random seed:"))
-        self.env_operation.addWidget(self.env_random_seed)
-
-        # self.table = QTableWidget()
-        # self.reset_table()
-
-        self.submit.setEnabled(True)
-        self.export_table.setEnabled(False)
-        self.export_plot.setEnabled(False)
-
-        self.operation_panel = QGridLayout()
-        self.operation_panel.addWidget(self.submit, 1, 0)
-        self.operation_panel.addWidget(self.plot, 1, 1)
-        self.operation_panel.addWidget(self.clear_table_bt, 2, 0)
-        self.operation_panel.addWidget(self.clear_plot_bt, 2, 1)
-        self.operation_panel.addWidget(self.export_table, 3, 0)
-        self.operation_panel.addWidget(self.export_plot, 3, 1)
 
         self.left = QVBoxLayout()
         self.left.addWidget(self.left_specie_title)
@@ -250,42 +167,76 @@ class PanelInit:
         self.left.addWidget(self.left_environment_title)
         self.left.addLayout(self.env_data)
         self.left.addLayout(self.env_operation)
-        self.left.addWidget(self.extreme_title)
-        self.left.addLayout(self.env_extreme)
-        self.left.addWidget(self.operation_title)
-        self.left.addLayout(self.operation_panel)
-        self.left.addWidget(self.slider)
-        # self.left.addWidget(self.left_specie_table_title)
-        # self.left.addWidget(self.table)
+        self.left.addWidget(self.left_specie_table_title)
+        self.left.addWidget(self.table)
         return self.left
 
-    def right_element(self):
-        self.right_title = QLabel("Plotting Panel")
-        self.right_title.setAlignment(Qt.AlignCenter)
-        font = self.right_title.font()
-        font.setBold(True)
-        self.right_title.setFont(font)
+    def middle_element(self):
+        self.submit = QPushButton("Submit")
+        self.clear_table_bt = QPushButton("Clear Table")
+        self.clear_plot_bt = QPushButton("Clear Plot")
+        self.plot = QPushButton("Plot")
+        self.export_table = QPushButton("Export Table")
+        self.export_plot = QPushButton("Export Plot")
 
+        self.submit.setEnabled(True)
+        self.export_table.setEnabled(False)
+        self.export_plot.setEnabled(False)
+
+        # barchart
+        self.barchart = QChartView()
+        self.barchart.setRenderHint(QPainter.Antialiasing)
+
+    def middle_panel(self):
+        self.middle_element()
+        # operation layout
+        self.operation_panel = QGridLayout()
+        self.operation_panel.addWidget(self.submit, 1, 0)
+        self.operation_panel.addWidget(self.plot, 1, 1)
+        self.operation_panel.addWidget(self.clear_table_bt, 2, 0)
+        self.operation_panel.addWidget(self.clear_plot_bt, 2, 1)
+        self.operation_panel.addWidget(self.export_table, 3, 0)
+        self.operation_panel.addWidget(self.export_plot, 3, 1)
+
+        # middle title
+        self.middle_title = QLabel("Operation Panel")
+        self.middle_title.setAlignment(Qt.AlignCenter)
+        font = self.middle_title.font()
+        font.setBold(True)
+        self.middle_title.setFont(font)
+
+        # slider layout
+        self.slider = QSlider(Qt.Horizontal)
+        # self.slider.setRange(0, 1000)
+        self.slider.setVisible(False)
+        self.slider_left = QLabel("0")
+        self.slider_right = QLabel("0")
+        self.slider_left.setVisible(False)
+        self.slider_right.setVisible(False)
+        self.slider_layout = QHBoxLayout()
+        self.slider_layout.addWidget(self.slider_left)
+        self.slider_layout.addWidget(self.slider)
+        self.slider_layout.addWidget(self.slider_right)
+
+        # middle layout
+        self.middle = QVBoxLayout()
+        self.middle.addWidget(self.middle_title)
+        self.middle.addLayout(self.operation_panel)
+        self.middle.addLayout(self.slider_layout)
+        self.middle.addWidget(self.barchart)
+
+        return self.middle
+
+    def right_panel(self):
         self.boxchart = QChartView()
         self.boxchart.setRenderHint(QPainter.Antialiasing)
 
         self.linechart = QChartView()
         self.linechart.setRenderHint(QPainter.Antialiasing)
 
-        self.network = QChartView()
-        self.network.setRenderHint(QPainter.Antialiasing)
-
-    def right_panel(self):
-        self.right_element()
-
-        self.right_plot = QTabWidget()
-        self.right_plot.addTab(self.network, "Network")
-        self.right_plot.addTab(self.boxchart, "Box Chart")
-        self.right_plot.addTab(self.linechart, "Line Chart")
-
         self.right = QVBoxLayout()
-        self.right.addWidget(self.right_title)
-        self.right.addWidget(self.right_plot)
+        self.right.addWidget(self.boxchart)
+        self.right.addWidget(self.linechart)
 
         return self.right
 

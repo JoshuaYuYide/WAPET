@@ -11,11 +11,11 @@ class TableOperation:
     def __init__(self):
         pass
 
-    def reset_species_table(self):
-        self.species_table.setRowCount(8)
-        self.species_table.setColumnCount(0)
-        self.species_table.setVerticalHeaderLabels(["species", "name", "survival rate", "fecundity", "initial population", "growth rate", "carrying capacity", "natural life span"])
-        self.species_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+    def reset_table(self):
+        self.table.setRowCount(8)
+        self.table.setColumnCount(0)
+        self.table.setVerticalHeaderLabels(["species", "name", "survival rate", "fecundity", "initial population", "growth rate", "carrying capacity", "natural life span"])
+        self.table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.items = 0
 
     def reset_result_table(self):

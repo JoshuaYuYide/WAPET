@@ -51,6 +51,9 @@ class MathmaticsModel:
         solution = odeint(self.logistic_growth, N0, t, args=(r, K))
         return solution
 
+    def logistic_solution_discrete(self, N0, r, K, t):
+        return K / (1 + ((K - N0) / N0) * np.exp(-r * t))
+
 #
 # a = MathmaticsModel()
 # # 参数

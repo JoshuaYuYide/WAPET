@@ -6,10 +6,7 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
-import random
-import networkx as nx
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+
 
 class Visulization:
     def __init__(self):
@@ -105,30 +102,3 @@ class Visulization:
         self.piechart.addSeries(self.pieseries)
         self.piechart.legend().setAlignment(Qt.AlignLeft)
         self.barchart.setChart(self.piechart)
-
-    def random_plot_linechart(self):
-        # Line Chart
-        chart = QChart()
-        series = QLineSeries()
-        series.setName("Line Chart")
-
-        data = [
-            (random.random(), random.random()),
-            (random.random(), random.random()),
-            (random.random(), random.random()),
-            (random.random(), random.random()),
-            (random.random(), random.random())
-        ]
-
-        for x, y in data:
-            series.append(x, y)
-
-        chart.addSeries(series)
-        chart.createDefaultAxes()
-
-        # 设置线条样式
-        pen = QPen(Qt.blue)
-        pen.setWidth(2)
-        series.setPen(pen)
-
-        self.linechart.setChart(chart)

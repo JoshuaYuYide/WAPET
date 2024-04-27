@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     tabWidget.addTab(one_specie.get_widget(), "One Specie")
     tabWidget.addTab(two_species.get_widget(), "Two Species")
-    tabWidget.addTab(artificial_species, "Artificial Species")
+    tabWidget.addTab(artificial_species.get_widget(), "Artificial Species")
     tabWidget.addTab(QWidget(), "Policy Analysis")
 
     tabWidget.resize(minimum_size)

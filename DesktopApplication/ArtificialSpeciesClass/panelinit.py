@@ -79,8 +79,6 @@ class PanelInit:
 
         self.species = QComboBox()
         self.species.addItem("target species")
-        self.species.addItem("predator species")
-        self.species.addItem("prey species")
 
         self.name = QLineEdit()
         self.name.setClearButtonEnabled(True)
