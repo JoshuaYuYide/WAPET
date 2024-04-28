@@ -97,7 +97,7 @@ class PanelInit:
         self.growth_rate.setText("0.1")
         self.carrying_capacity = QLineEdit()
         self.carrying_capacity.setClearButtonEnabled(True)
-        self.carrying_capacity.setText("1000000")
+        self.carrying_capacity.setText("10000")
         self.natural_life_span = QLineEdit()
         self.natural_life_span.setClearButtonEnabled(True)
         self.natural_life_span.setText("10000")
@@ -284,7 +284,6 @@ class PanelInit:
         self.right_element()
 
         self.right_plot = QTabWidget()
-        self.right_plot.addTab(self.network, "Network")
         self.right_plot.addTab(self.boxchart, "Box Chart")
         self.right_plot.addTab(self.linechart, "Line Chart")
 

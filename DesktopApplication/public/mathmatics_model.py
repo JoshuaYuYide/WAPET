@@ -1,7 +1,8 @@
 import math
-import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
+import numpy as np
+import random
 
 class MathmaticsModel:
     def __init__(self):
@@ -54,6 +55,16 @@ class MathmaticsModel:
     def logistic_solution_discrete(self, N0, r, K, t):
         return K / (1 + ((K - N0) / N0) * np.exp(-r * t))
 
+    def logistic_growth_individual(self, N, K, r):
+        # 第一次随机：环境调控，决定是否有机会繁殖
+        if random.random() < (1 - N / K):
+            # 第二次随机：繁殖成功率
+            if random.random() < r:
+                return True
+            else:
+                return False
+        else:
+            return False
 #
 # a = MathmaticsModel()
 # # 参数

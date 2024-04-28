@@ -45,7 +45,9 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
         self.species_table.cellChanged.connect(self.check_species_table)
         self.clear_table_bt.clicked.connect(self.check_species_table)
 
-        self.simulate.clicked.connect(self.simulate_logistic_growth_discrete)
+        # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_specie)
+        self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_individual)
+
 
         # check
         self.name.textChanged.connect(self.check_disable)
