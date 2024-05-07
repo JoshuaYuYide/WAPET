@@ -1,14 +1,13 @@
 import sys
 from PySide6.QtCore import Qt, Slot, QPointF
-from PySide6.QtGui import QPainter, QGradient, QPen
+from PySide6.QtGui import QPainter, QGradient, QPen, QColor
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QHBoxLayout, QLineEdit, QMainWindow,
                                QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu, QCheckBox, QTabWidget)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 
-
-class PanelInit:
+class PanelInit():
     def __init__(self):
         pass
 
@@ -264,6 +263,29 @@ class PanelInit:
         # self.left.addWidget(self.table)
         return self.left
 
+    def middel_right_element(self):
+        # self.mr_main_widget = QWidget()
+        self.mr_grid_widget = GridWidget(10)
+        self.mr_button_layout = QHBoxLayout()
+        self.mr_button_draw_1 = QPushButton("Color 1")
+        self.mr_button_draw_2 = QPushButton("Color 2")
+        self.mr_button_draw_3 = QPushButton("Color 3")
+
+    def middle_right_panel(self):
+        self.middel_right_element()
+
+        self.middle_right = QVBoxLayout()
+        self.middle_right.addWidget(self.mr_grid_widget)
+
+        self.middle_right_button_layout = QHBoxLayout()
+        self.middle_right_button_layout.addWidget(self.mr_button_draw_1)
+        self.middle_right_button_layout.addWidget(self.mr_button_draw_2)
+        self.middle_right_button_layout.addWidget(self.mr_button_draw_3)
+
+        self.middle_right.addLayout(self.middle_right_button_layout)
+
+        return self.middle_right
+
     def right_element(self):
         self.right_title = QLabel("Plotting Panel")
         self.right_title.setAlignment(Qt.AlignCenter)
@@ -280,6 +302,7 @@ class PanelInit:
         self.network = QChartView()
         self.network.setRenderHint(QPainter.Antialiasing)
 
+
     def right_panel(self):
         self.right_element()
 
@@ -295,5 +318,37 @@ class PanelInit:
 
 
 
+class GridWidget(QWidget):
+    def __init__(self, num_grid):
+        super().__init__()
 
+        self.grid_size = num_grid  # 格子的大小
+        self.grid = [[0 for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # 格子的状态
+        self.colors = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0)]  # 格子的颜色
+        self.current_color = 0  # 当前选中的颜色
 
+    def mousePressEvent(self, event):
+        cell_size = min(self.width(), self.height()) / self.grid_size
+        x = int(event.pos().x() / cell_size)
+        y = int(event.pos().y() / cell_size)
+
+        if x >= 0 and x < self.grid_size and y >= 0 and y < self.grid_size:
+            self.grid[y][x] = self.current_color
+            self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        cell_size = min(self.width(), self.height()) / self.grid_size
+
+        # 绘制格子边框
+        border_pen = QPen(Qt.black, 1)
+        painter.setPen(border_pen)
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                painter.drawRect(x * cell_size, y * cell_size, cell_size, cell_size)
+
+        # 绘制格子颜色
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                color = self.colors[self.grid[y][x]]
+                painter.fillRect(x * cell_size + 1, y * cell_size + 1, cell_size - 1, cell_size - 1, color)
