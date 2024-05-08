@@ -1,6 +1,5 @@
 import math
 from public.mathmatics_model import MathmaticsModel
-import pandas as pd
 from PySide6.QtWidgets import (QTableWidgetItem)
 from PySide6.QtCore import Slot
 
