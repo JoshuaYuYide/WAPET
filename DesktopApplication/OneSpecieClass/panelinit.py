@@ -170,6 +170,12 @@ class PanelInit():
         self.slider_left = QLabel("0")
         self.slider_right = QLabel("0")
 
+        self.mr_grid_widget = GridWidget(10)
+        self.mr_button_layout = QHBoxLayout()
+        self.mr_button_draw_1 = QPushButton("Color 1")
+        self.mr_button_draw_2 = QPushButton("Color 2")
+        self.mr_button_draw_3 = QPushButton("Color 3")
+
     def left_panel(self):
         self.left_element()
         # small layout construction
@@ -261,18 +267,6 @@ class PanelInit():
         self.left.addLayout(self.slider_panel)
         # self.left.addWidget(self.left_specie_table_title)
         # self.left.addWidget(self.table)
-        return self.left
-
-    def middel_right_element(self):
-        # self.mr_main_widget = QWidget()
-        self.mr_grid_widget = GridWidget(10)
-        self.mr_button_layout = QHBoxLayout()
-        self.mr_button_draw_1 = QPushButton("Color 1")
-        self.mr_button_draw_2 = QPushButton("Color 2")
-        self.mr_button_draw_3 = QPushButton("Color 3")
-
-    def middle_right_panel(self):
-        self.middel_right_element()
 
         self.middle_right = QVBoxLayout()
         self.middle_right.addWidget(self.mr_grid_widget)
@@ -281,10 +275,19 @@ class PanelInit():
         self.middle_right_button_layout.addWidget(self.mr_button_draw_1)
         self.middle_right_button_layout.addWidget(self.mr_button_draw_2)
         self.middle_right_button_layout.addWidget(self.mr_button_draw_3)
-
         self.middle_right.addLayout(self.middle_right_button_layout)
 
-        return self.middle_right
+        self.middle_right_panel = QWidget()
+        self.middle_right_panel.setLayout(self.middle_right)
+
+        self.left_widget = QWidget()
+        self.left_widget.setLayout(self.left)
+        self.left_panel = QTabWidget()
+        self.left_panel.addTab(self.left_widget, "Species Data Management")
+        self.left_panel.addTab(self.middle_right_panel, "Landscape Map")
+
+
+        return self.left_panel
 
     def right_element(self):
         self.right_title = QLabel("Plotting Panel")

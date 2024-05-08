@@ -28,8 +28,8 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
         # main
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.leftmost_panel())
-        self.layout.addLayout(self.left_panel())
-        self.layout.addLayout(self.middle_right_panel())
+        self.layout.addWidget(self.left_panel())
+        # self.layout.addLayout(self.middle_right_panel())
         # self.layout.addLayout(self.middle_panel())
         self.layout.addLayout(self.right_panel())
 
