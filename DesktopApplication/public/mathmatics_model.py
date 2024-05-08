@@ -1,7 +1,8 @@
 import math
-import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
+import numpy as np
+import random
 
 class MathmaticsModel:
     def __init__(self):
@@ -53,6 +54,46 @@ class MathmaticsModel:
 
     def logistic_solution_discrete(self, N0, r, K, t):
         return K / (1 + ((K - N0) / N0) * np.exp(-r * t))
+
+    def logistic_growth_individual(self, N, K, r):
+        # 第一次随机：环境调控，决定是否有机会繁殖
+        if random.random() < (1 - N / K):
+            # 第二次随机：繁殖成功率
+            if random.random() < r:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def allee_effect_individual(self, r, K, A, N0, t):
+        """
+        个体层面的离散时间Allen模型模拟。
+        参数:
+        r : float
+            内在增长率。
+        K : int
+            环境承载力。
+        alpha : float
+            种群密度负面影响系数。
+        N0 : int
+            初始种群大小。
+        t : int
+            模拟时间节点。
+        返回:
+        N : list
+            时间序列中的种群大小。
+        """
+        current_population = N0
+        new_population = 0
+        for _ in range(current_population):
+            survival_probability = (current_population/ K - 1) * (current_population/ A - 1)
+            if np.random.rand() < survival_probability:
+                # 个体存活并产生一个后代
+                return True
+            else:
+                return False
+
 
 #
 # a = MathmaticsModel()

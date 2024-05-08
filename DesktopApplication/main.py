@@ -17,7 +17,7 @@ if __name__ == "__main__":
     tabWidget = QTabWidget()
 
     screen_size = tabWidget.screen().size()
-    minimum_size = QSize(screen_size.width() / 1.2, screen_size.height() / 1.5)
+    minimum_size = QSize(screen_size.width() / 1.5, screen_size.height() / 1.5)
 
     # Create bar graph
     one_specie = OneSpecie()

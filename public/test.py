@@ -1,3 +1,4 @@
+
 import mesa
 import numpy as np
 import seaborn as sns # Data visualization tools.
@@ -87,7 +88,6 @@ results_5s = mesa.batch_run(
 )
 
 results_5s_df = pd.DataFrame(results_5s)
-
 
 '''
 model = MoneyModel(10)
