@@ -24,6 +24,9 @@ class animal:
         self.is_illness = False
         self.diease = None
         self.hydration = 100
+        self.hunger = 100
+        self.move_speed = 1
+
 
     def is_live(self):
         if self.health <= 0:
@@ -49,6 +52,13 @@ class animal:
     def drink(self, water_id):
         water_agent = self.model.water_agents.get(water_id)
         water_agent.reduce_volumn()
+        self.hydration = 100
+        if not water_agent.can_drink():
+            self.health -= 10
+            self.diease = self.model.disaseAgent(self.model.next_id, self.model.disaseAgent)
+
+    def move(self, position):
+        self.position = position
 
 # class family:
 #     def __init__(self):
@@ -74,7 +84,8 @@ class TargetSpecieAgent(Agent, animal):
         animal.__init__(self, 'target_specie')
 
     def step(self):
-        pass
+        self.hydration -= 2
+        self.hunger -= 2
 
 class predatorAgent(Agent):
     def __init__(self, unique_id, model):
@@ -226,9 +237,23 @@ class SoilAgent(Agent):
                 type = random.choice(list(number_resource.keys()))
                 if type == 'forest':
                     self.map[i][j] = self.model.TreeAgent(self.model.next_id, self.model.TreeAgent)
+                    number_resource[type] -= 1
+                elif type == 'grassland':
+                    self.map[i][j] = self.model.TreeAgent(self.model.next_id, self.model.TreeAgent)
+                    number_resource[type] -= 1
+                elif type == 'water':
+                    self.map[i][j] = self.model.WaterAgent(self.model.next_id, self.model.WaterAgent)
+                    number_resource[type] -= 1
+                elif type == 'bare':
+                    self.map[i][j] = self.model.SoilAgent(self.model.next_id, self.model.SoilAgent)
+                    number_resource[type] -= 1
+                elif type == 'humanland':
+                    self.map[i][j] = self.model.HumanLandAgent(self.model.next_id, self.model.HumanLandAgent)
+                    number_resource[type] -= 1
 
-                self.map[i][j] = type
-                number_resource[type] -= 1
+
+
+
                 if number_resource[type] == 0:
                     number_resource.pop(type)
 
@@ -283,13 +308,13 @@ class CatastrophesAgent(Agent):
 class EnvModel(Model):
     def __init__(self, time):
         self.schedule = mesa.time.SimultaneousActivation(self)
-        solid_agent = SoilAgent(0, self, 'tropical rain forest')
+        solid_agent = SoilAgent(self.next_id, self, 'tropical rain forest')
         solid_agent.land_init()
         self.schedule.add(solid_agent)
-        self.climate_agent = climateAgent(0, self, 'tropical rain forest climate')
+        self.climate_agent = climateAgent(self.next_id, self, 'tropical rain forest climate')
         self.climate_agent.climate_style_init()
         self.schedule.add(self.climate_agent)
-        self.water_agents = WaterAgent(0, self)
+        self.water_agents = WaterAgent(self.next_id, self)
 
 
 
