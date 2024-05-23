@@ -95,6 +95,8 @@ class MathmaticsModel:
                 return False
 
 
+
+
 #
 # a = MathmaticsModel()
 # # 参数

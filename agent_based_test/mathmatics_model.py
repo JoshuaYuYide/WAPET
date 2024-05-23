@@ -3,10 +3,23 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from scipy.stats import norm
 
-class MathmaticsModel:
-    def __init__(self):
+
+class MathmaticsModelGroup:
+    def __init__(self, K, cell_neighbors_occupy):
+        self.K = K
+        self.cell_neighbors_occupy = cell_neighbors_occupy
+
+    def environment_effect_model(self, K, N, t):
+        self.K = self.cellular_automata()
         pass
+
+
+
+class MathmaticsModelIndividual:
+    def __init__(self, cell_neighbors_occupy):
+        self.cell_neighbors_occupy = cell_neighbors_occupy
 
     def LefkovitchMatrix(self, years):
         # 定义阶段的生存率和转换概率
@@ -42,6 +55,10 @@ class MathmaticsModel:
 
     def allee_effect_model(self, N, t, r, K, A):
         dNdt = r * N * ((N / K) - 1) * ((N / A) - 1)
+        return dNdt
+
+    def walk_model(self, N, t, r, K):
+        dNdt = r * N * (1 - (N / K))
         return dNdt
 
     def logistic_growth_model(self, N, t, r, K):
@@ -94,6 +111,40 @@ class MathmaticsModel:
             else:
                 return False
 
+    # species cellular automata model
+    def cellular_automata(self, map, specie):
+        candidate_position = []
+        for i in range(len(map.map_width)):
+            for j in range(len(map.map_height)):
+                if map[i][j] == 'empty':
+                    specie_neighbors_count = 0
+                    for x in range(i - 1, i + 2):
+                        for y in range(j - 1, j + 2):
+                            if map[x][y] == specie:
+                                specie_neighbors_count += 1
+                    if specie_neighbors_count >= self.cell_neighbors_occupy:
+                        candidate_position.append((i, j))
+        return candidate_position
+
+    # random walk model for species
+    def random_walk(self, speed_mean, speed_std, start_point, map):
+        speed = self.speed_gaussian(speed_mean, speed_std)
+        position = self.position_transfer(speed, map, start_point)
+        return position
+
+    def speed_gaussian(self, mean = 1, std = 1):
+        return norm.rvs(loc=mean, scale=std, size=1)
+
+    def position_transfer(self, speed, map, start):
+        candidate_position = []
+        for i in range(start[0] - speed, start[0] + speed):
+            for j in range(start[1] - speed, start[1] + speed):
+                if not map[i, j]['is_inaccessible']:
+                    candidate_position.append((i, j))
+        return random.choice(candidate_position)
+
+
+
 
 #
 # a = MathmaticsModel()
@@ -123,6 +174,17 @@ class MathmaticsModel:
 # plt.ylabel('Population Size')
 # plt.legend()
 # plt.show()
+
+
+
+
+
+
+
+
+
+
+
 
 
 

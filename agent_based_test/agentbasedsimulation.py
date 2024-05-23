@@ -3,13 +3,13 @@ import numpy as np
 import pandas as pd
 from mesa import Agent, Model
 from PySide6.QtCore import Slot
-from mathmatics_model import MathmaticsModel
+from mathmatics_model import MathmaticsModelGroup, MathmaticsModelIndividual
 import random
+from collections import Counter
 
 
 class animal:
-    def __init__(self, specie):
-        self.health = 100
+    def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100):
         self.age = random.randint(0, 10)
         self.gender = random.choice(['male', 'female'])
         self.kids = []
@@ -17,19 +17,24 @@ class animal:
         self.parents = []
         self.parents_count = 0
         self.partner = None
-        self.mathmatics_model = MathmaticsModel()
+        self.mathmatics_model = MathmaticsModelIndividual()
         self.specie = specie
         self.move_speed = 1
-        self.position = [0, 0]
-        self.is_illness = False
-        self.diease = None
-        self.hydration = 100
+        self.position = [-1, -1]
         self.hunger = 100
-        self.move_speed = 1
+        self.move_speed_mean = move_speed_mean
+        self.move_speed_std = move_speed_std
+        self.is_married = False
+        self.increase_rate = increase_rate
+        self.life_time = life_time
+        self.is_alive = True
 
 
     def is_live(self):
-        if self.health <= 0:
+        if self.hunger <= 0 and self.age > self.life_time:
+            self.model.soil_agent.delete_specie_on_soil(self.specie, self.position)
+            self.model.schedule.remove(self)
+            self.is_alive = False
             return False
         else:
             return True
@@ -40,52 +45,51 @@ class animal:
     def escape(self):
         pass
 
-    def get_married(self):
-        pass
+    def get_married(self, partner_id):
+        if not self.is_married and self.age > 10:
+            self.model.agent.find_agent_by_id(partner_id)  # todo
 
-    def pregnet(self):
-        pass
+        self.partner = partner_id
+        self.is_married = True
+        partner_agent = self.find_agent_by_id(partner_id)
+        partner_agent.partner = self.unique_id
+        partner_agent.is_married = True
 
     def give_birth(self):
-        pass
-
-    def drink(self, water_id):
-        water_agent = self.model.water_agents.get(water_id)
-        water_agent.reduce_volumn()
-        self.hydration = 100
-        if not water_agent.can_drink():
-            self.health -= 10
-            self.diease = self.model.disaseAgent(self.model.next_id, self.model.disaseAgent)
-
-    def move(self, position):
-        self.position = position
-
-# class family:
-#     def __init__(self):
-#         self.family_id = 0
-#         self.members = []
-#         self.kids = []
-#         self.parents = []
-#         self.position = [0, 0]
-#
-#     def get_new_family_id(self):
-#         self.family_id += 1
-#         return self.family_id
-#
-#     def build_family(self, members):
-#         self.members = members
-#         pass
-
-
+        if self.is_married:
+            N = self.model.soil_agent.map[self.position[0], self.position[1]][self.specie]
+            K = self.model.soil_agent.map[self.position[0], self.position[1]]['carry_ability']
+            is_birth = self.mathmatics_model.logistic_growth_individual(N, K, self.increase_rate)
+            if is_birth:
+                new_agent_id = self.model.next_id
+                new_agent = TargetSpecieAgent(new_agent_id, self.model)
+                new_agent.position = self.position
+                new_agent.parents = [self.unique_id, self.partner]
+                new_agent.parents_count = 2
+                new_agent.age = 0
+                self.kids_count += 1
+                self.kids.append(new_agent_id)
+                partner_agent = self.find_agent_by_id(self.partner_id)
+                partner_agent.kids_count += 1
+                partner_agent.kids.append(new_agent_id)
+                self.model.soil_agent.add_specie_on_soil(self.specie, self.position)
+                self.model.new_agents.append(new_agent)
+    def move(self, map):
+        self.position = self.mathmatics_model.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
+        return self.position
 
 class TargetSpecieAgent(Agent, animal):
     def __init__(self, unique_id, model):
         Agent.__init__(unique_id, model)
-        animal.__init__(self, 'target_specie')
+        animal.__init__(self, 'target_specie', 1, 1, 0.1)
+
 
     def step(self):
-        self.hydration -= 2
         self.hunger -= 2
+        self.move(self.model.soil_agent.map)
+        self.age += 1
+
+
 
 class predatorAgent(Agent):
     def __init__(self, unique_id, model):
@@ -103,37 +107,37 @@ class HumanAgent(Agent):
         animal.__init__(self, 'human')
         self.money = 100
 
-class BankAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.money = 10000
-        self.interest_rate = 0.05
+# class BankAgent(Agent):
+#     def __init__(self, unique_id, model):
+#         super().__init__(unique_id, model)
+#         self.money = 10000
+#         self.interest_rate = 0.05
+#
+#     def step(self):
+#         self.money = self.money * (1 + self.interest_rate)
 
-    def step(self):
-        self.money = self.money * (1 + self.interest_rate)
 
-
-class diseaseAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.infection_rate = 0.1
-        self.dead_rate = 0.01
-        self.time = 0
-
-    def is_infect(self):
-        if random.random() < self.infection_rate:
-            return True
-        else:
-            return False
-
-    def change_rate(self):
-        if self.time > 10:
-            self.infection_rate += 0.01
-            self.dead_rate -= 0.01
-
-    def step(self, time):
-        self.time = time
-        self.change_rate()
+# class diseaseAgent(Agent):
+#     def __init__(self, unique_id, model):
+#         super().__init__(unique_id, model)
+#         self.infection_rate = 0.1
+#         self.dead_rate = 0.01
+#         self.time = 0
+#
+#     def is_infect(self):
+#         if random.random() < self.infection_rate:
+#             return True
+#         else:
+#             return False
+#
+#     def change_rate(self):
+#         if self.time > 10:
+#             self.infection_rate += 0.01
+#             self.dead_rate -= 0.01
+#
+#     def step(self, time):
+#         self.time = time
+#         self.change_rate()
 
 
 
@@ -144,19 +148,19 @@ class climateAgent(Agent):
         super().__init__(unique_id, model)
         self.type = type
         self.climate_dict = {'sunshine': 0, 'wind': 0, 'rainfall': 0, 'cloudy': 0}
-        self.temperature_dict = {'sunshine': {'temperature': [], 'prob': []}, 'wind': {'temperature': [], 'prob': []}, 'rainfall': {'temperature': [], 'prob': []}, 'cloudy': {'temperature': [], 'prob': []}}
-
-        self.temperature_dict['sunshine']['temperature'] = np.linspace(25, 40, 100)
-        self.temperature_dict['sunshine']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['sunshine']['temperature'] - 35) ** 2 / (2 * 1 ** 2))
-
-        self.temperature_dict['wind']['temperature'] = np.linspace(20, 35, 100)
-        self.temperature_dict['wind']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['wind']['temperature'] - 27) ** 2 / (2 * 1 ** 2))
-
-        self.temperature_dict['rainfall']['temperature'] = np.linspace(15, 30, 100)
-        self.temperature_dict['rainfall']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['rainfall']['temperature'] - 27) ** 2 / (2 * 1 ** 2))
-
-        self.temperature_dict['cloudy']['temperature'] = np.linspace(20, 35, 100)
-        self.temperature_dict['cloudy']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['cloudy']['temperature'] - 27) ** 2 / (2 * 1 ** 2))
+        # self.temperature_dict = {'sunshine': {'temperature': [], 'prob': []}, 'wind': {'temperature': [], 'prob': []}, 'rainfall': {'temperature': [], 'prob': []}, 'cloudy': {'temperature': [], 'prob': []}}
+        #
+        # self.temperature_dict['sunshine']['temperature'] = np.linspace(25, 40, 100)
+        # self.temperature_dict['sunshine']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['sunshine']['temperature'] - 35) ** 2 / (2 * 1 ** 2))
+        #
+        # self.temperature_dict['wind']['temperature'] = np.linspace(20, 35, 100)
+        # self.temperature_dict['wind']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['wind']['temperature'] - 27) ** 2 / (2 * 1 ** 2))
+        #
+        # self.temperature_dict['rainfall']['temperature'] = np.linspace(15, 30, 100)
+        # self.temperature_dict['rainfall']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['rainfall']['temperature'] - 27) ** 2 / (2 * 1 ** 2))
+        #
+        # self.temperature_dict['cloudy']['temperature'] = np.linspace(20, 35, 100)
+        # self.temperature_dict['cloudy']['prob'] = (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-(self.temperature['cloudy']['temperature'] - 27) ** 2 / (2 * 1 ** 2))
 
         # mu = 0  # 均值
         # sigma = 1  # 标准差
@@ -174,119 +178,138 @@ class climateAgent(Agent):
 
     def step(self):
         self.climate = random.choice(list(self.climate.keys()), weights = list(self.climate.values()))
-        self.temperature = random.choice(self.temperature[self.weather]['temperature'], weights = self.temperature[self.weather]['prob'])
-        if self.climate == 'rainfall':
-            self.model.water_agents.rainfall()
-
-class TreeAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.age = random.randint(0, 10)
-        self.position = []
-
-class WaterAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.volumn = random.randint(0, 100)
-        self.pure_prob = random.random()
-        self.position = []
-
-
-    def rainfall(self):
-        self.rate = random.uniform(0.1, 0.3)
-        self.rainfall()
-        self.increase_volumn()
-        self.purify()
-
-    def purify(self):
-        self.pure_prob += self.rate
-
-    def reduce_volumn(self):
-        self.pure_prob -= 0.01
-
-    def increase_volumn(self):
-        self.pure_prob += self.rate * 10
-
-    def can_drink(self):
-        if self.pure_prob > 0.8:
-            return True
-        else:
-            return False
+        # self.temperature = random.choice(self.temperature[self.weather]['temperature'], weights = self.temperature[self.weather]['prob'])
+        # if self.climate == 'rainfall':
+        #     self.model.water_agents.rainfall()
 
 
 class SoilAgent(Agent):
-    def __init__(self, unique_id, model, soil_type):
+    def __init__(self, unique_id, model, specie_list, unaccessible_num):
         super().__init__(unique_id, model)
         self.map_width = 100
         self.map_height = 100
         self.map = np.zeros([self.map_width, self.map_height])
-        self.soil_type = soil_type
+        self.specie_list = specie_list
+        self.soil_type_all = ['inaccessible', 'empty']
+        self.soil_type_all.extend(self.specie_list)
+        self.unaccessible_num = unaccessible_num
+        self.specie_occupy_density = 0.2
+        for i in self.map_width:
+            for j in self.map_height:
+                self.map[i, j] = {}
+                self.map[i, j]['is_empty'] = True
+                self.map[i, j]['is_inaccessible'] = False
+                self.map[i, j]['main_specie'] = 'empty'
+                self.map[i, j]['carry_ability'] = random.randint(10, 100)
+                for name in self.soil_type_all:
+                    self.soil_specie_num[name] = 0
+        self.climate_history = []
+
+
 
     def land_init(self):
-        if self.soil_type == 'tropical rain forest':
-            self.num_forest = 50
-            self.num_grassland = 30
-            self.num_water = 10
-            self.num_bare = 10
-            self.num_humanland = 0
+        remain_unacciessible_position_number = self.unaccessible_num
+        while remain_unacciessible_position_number > 0:
+            x = random.randint(0, self.map_width)
+            y = random.randint(0, self.map_height)
 
-            number_resource = {'forest': 50, 'grassland': 30, 'water': 10, 'bare': 10, 'humanland': 0}
+            if self.map[x, y]['is_empty']:
+                self.map[x, y]['is_empty'] = False
+                self.map[x, y]['is_inaccessible'] = True
+                self.map[x, y]['main_specie'] = 'inaccessible'
+                remain_unacciessible_position_number -= 1
+
+    def get_valid_soil(self):
+        valid_soil = []
+        for i in range(self.map_width):
+            for j in range(self.map_height):
+                if self.map[i, j]['is_empty']:
+                    valid_soil.append((i, j))
+        return valid_soil
+
+        # for specie in self.specie_list:
+        #     specie_num = 1
+        #     while specie_num!=0:
+        #         x = random.randint(0, self.map_width)
+        #         y = random.randint(0, self.map_height)
+        #         if self.map[x][y] == 0:
+        #             self.map[x][y] = specie
+        #             specie_num -= 1
+
+        # for i in range(self.map_width):
+        #     for j in range(self.map_height):
+        #         if self.map[i][j] == 0:
+        #             self.map[i][j] = 'empty'
+
+    def specie_occupy(self, specie):
+        for i in range(self.map_width):
+            for j in range(self.map_height):
+                if self.map[i][j]['is_empty']:
+                    if self.specie_occupy_density < self.map[i][j][specie]:
+                        self.map[i][j]['main_specie'] = specie
+
+    # add the
+    def add_specie_on_soil(self, specie, position):
+        if not self.map[position[0], position[1]]['is_inaccessible']:
+            if self.map[position[0], position[1]][specie] > 0 or self.soil_specie_num[position[0], position[1]]['is_empty']:
+                self.soil_specie_num[position[0], position[1]][specie] += 1
+
+    def delete_specie_on_soil(self, specie, position):
+        if self.map[position[0], position[1]][specie] > 0:
+            self.soil_specie_num[position[0], position[1]][specie] -= 1
+        else:
+            print('cannot delete %s on %s' % (specie, str(position)))
+
+    def change_soil_carry_ability(self):
+        self.climate_history.append(self.model.climate_agent.climate)
+        frequency = Counter(self.climate_history)
+        var = np.var(list(frequency.values()))
+        if var == 0 and len(self.climate_history) < 10:
+            var = 1
+        elif var == 0 and len(self.climate_history) >= 10:
+            var = 0.1
 
         for i in range(self.map_width):
             for j in range(self.map_height):
-                type = random.choice(list(number_resource.keys()))
-                if type == 'forest':
-                    self.map[i][j] = self.model.TreeAgent(self.model.next_id, self.model.TreeAgent)
-                    number_resource[type] -= 1
-                elif type == 'grassland':
-                    self.map[i][j] = self.model.TreeAgent(self.model.next_id, self.model.TreeAgent)
-                    number_resource[type] -= 1
-                elif type == 'water':
-                    self.map[i][j] = self.model.WaterAgent(self.model.next_id, self.model.WaterAgent)
-                    number_resource[type] -= 1
-                elif type == 'bare':
-                    self.map[i][j] = self.model.SoilAgent(self.model.next_id, self.model.SoilAgent)
-                    number_resource[type] -= 1
-                elif type == 'humanland':
-                    self.map[i][j] = self.model.HumanLandAgent(self.model.next_id, self.model.HumanLandAgent)
-                    number_resource[type] -= 1
+                self.map[i][j]['carry_ability'] = self.map[i][j]['carry_ability'] * var
 
-
-
-
-                if number_resource[type] == 0:
-                    number_resource.pop(type)
-
-
-
-    def remodel(self):
-        pass
-
-    def unavailable(self):
-        pass
-
-class HumanLandAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.age = random.randint(0, 10)
-
-    def school(self):
-        pass
-
-    def factory(self):
-        pass
-
-    def farm(self):
-        pass
-
-    def house(self):
-        pass
-
-    def park(self):
-        pass
 
     def step(self):
-        pass
+        for specie in self.specie_list:
+            self.specie_occupy(specie)
+        self.change_soil_carry_ability()
+
+
+
+    #
+    # def remodel(self):
+    #     pass
+    #
+    # def unavailable(self):
+    #     pass
+
+# class HumanLandAgent(Agent):
+#     def __init__(self, unique_id, model):
+#         super().__init__(unique_id, model)
+#         self.age = random.randint(0, 10)
+#
+#     def school(self):
+#         pass
+#
+#     def factory(self):
+#         pass
+#
+#     def farm(self):
+#         pass
+#
+#     def house(self):
+#         pass
+#
+#     def park(self):
+#         pass
+#
+#     def step(self):
+#         pass
 
 class CatastrophesAgent(Agent):
     def __init__(self, unique_id, model):
@@ -306,25 +329,25 @@ class CatastrophesAgent(Agent):
 
 
 class EnvModel(Model):
-    def __init__(self, time):
+    def __init__(self, time, specie_dict, unaccessible_num):
         self.schedule = mesa.time.SimultaneousActivation(self)
-        solid_agent = SoilAgent(self.next_id, self, 'tropical rain forest')
+        soil_unique_id = self.next_id
+        solid_agent = SoilAgent(soil_unique_id, self, list(specie_dict.keys()), unaccessible_num)
         solid_agent.land_init()
         self.schedule.add(solid_agent)
-        self.climate_agent = climateAgent(self.next_id, self, 'tropical rain forest climate')
+        climate_unique_id = self.next_id
+        self.climate_agent = climateAgent(climate_unique_id, self, 'tropical rain forest climate')
         self.climate_agent.climate_style_init()
         self.schedule.add(self.climate_agent)
-        self.water_agents = WaterAgent(self.next_id, self)
+        # self.water_agents = WaterAgent(self.next_id, self)
 
-
-
-
-
-
-
-        for i in range(int(self.initial_population)):
-            target_specie = TargetSpecieAgent(self.next_id, self)
-            self.schedule.add(target_specie)
+        for specie in specie_dict.keys():
+            for i in range(int(specie_dict[specie])):
+                new_target_id = self.next_id
+                target_specie = TargetSpecieAgent(new_target_id, self)
+                target_specie.position = random.choice(solid_agent.get_valid_soil())
+                solid_agent.add_specie_on_soil(specie, target_specie.position)
+                self.schedule.add(target_specie)
 
         # self.datacollector = mesa.DataCollector(
         #     model_reporters={
@@ -336,10 +359,6 @@ class EnvModel(Model):
 
     def step(self):
         self.schedule.step()
-        if self.climate_agent.climate == 'rainfall':
-            self.water_agents.rainfall()
-            self.water_agents.increase_volumn()
-            self.water_agents.purify()
 
         # 在下一个时间步骤中添加新代理
         for new_agent in self.new_agents:
@@ -354,13 +373,11 @@ class EnvModel(Model):
 
 # parameters
 
-water_source_num = 3
-
-
-
+specie_dict = {'target_specie': 100}
+unaccessible_num = 10
 
 # run the model
-env_model = EnvModel(100, 1.0, 1000, 50)
+env_model = EnvModel(100, specie_dict, unaccessible_num)
 for i in range(10):
     env_model.step()
     print(env_model.initial_population)
