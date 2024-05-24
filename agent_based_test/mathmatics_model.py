@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from scipy.stats import norm
+import math
 
 
 class MathmaticsModelGroup:
@@ -144,11 +145,14 @@ class MathmaticsModelIndividual:
 
     def position_transfer(self, speed, map, start):
         candidate_position = []
-        for i in range(start[0] - speed, start[0] + speed):
-            for j in range(start[1] - speed, start[1] + speed):
+        for i in range(math.ceil(start[0] - speed), math.floor(start[0] + speed)):
+            for j in range(math.ceil(start[1] - speed), math.floor(start[1] + speed)):
                 if not map[i, j]['is_inaccessible']:
-                    candidate_position.append((i, j))
-        return random.choice(candidate_position)
+                    candidate_position.append([i, j])
+        if len(candidate_position) == 0:
+            return start
+        else:
+            return random.choice(candidate_position)
 
 
 
