@@ -64,7 +64,7 @@ class Animal:
 
     def give_birth(self):
         if self.is_married:
-            N = self.model.soil_agent.map[self.position[0], self.position[1]][self.specie]
+            N = sum(list(map(lambda x: len(x), self.soil_agent.map[self.position[0], self.position[1]][self.specie], self.soil_agent.specie_list)))
             K = self.model.soil_agent.map[self.position[0], self.position[1]]['carry_ability']
             is_birth = self.mathmatics_model.logistic_growth_individual(N, K, self.increase_rate)
             if is_birth:
@@ -168,14 +168,14 @@ class SoilAgent(Agent):
 
         self.map_width = 100
         self.map_height = 100
-        self.map = np.zeros([self.map_width, self.map_height])
+        self.map = np.empty([self.map_width, self.map_height], dtype=object)
         self.specie_list = specie_list
         self.soil_type_all = ['inaccessible', 'empty']
         self.soil_type_all.extend(self.specie_list)
         self.inaccessible_num = inaccessible_num
         self.specie_occupy_density = 0.2
-        for i in self.map_width:
-            for j in self.map_height:
+        for i in range(self.map_width):
+            for j in range(self.map_height):
                 self.map[i, j] = {}
                 self.map[i, j]['is_empty'] = True
                 self.map[i, j]['is_inaccessible'] = False
@@ -240,12 +240,9 @@ class SoilAgent(Agent):
                 self.map[i][j]['carry_ability'] = self.map[i][j]['carry_ability'] * var
 
     def can_eat(self, specie, position, increase_rate):
-        position_specie_num = sum(list(map(lambda x: len(x), self.map[position[0], position[1]][specie], self.specie_list)))
-        position_carry_ability = self.map[position[0], position[1]]['carry_ability']
-        if self.mathmatics_model.logistic_growth_individual(position_specie_num, position_carry_ability, increase_rate):
-            return True
-        else:
-            return random.random() < (position_carry_ability/ position_specie_num)
+        N = sum(list(map(lambda x: len(x), self.map[position[0], position[1]][specie], self.specie_list)))
+        K = self.map[position[0], position[1]]['carry_ability']
+        return self.mathmatics_model.logistic_growth_individual(N, K, increase_rate)
 
     def step(self):
         for specie in self.specie_list:
