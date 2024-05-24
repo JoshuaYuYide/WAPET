@@ -8,8 +8,8 @@ import random
 from collections import Counter
 
 
-class animal:
-    def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100):
+class Animal:
+    def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10):
         self.age = random.randint(0, 10)
         self.gender = random.choice(['male', 'female'])
         self.kids = []
@@ -28,11 +28,11 @@ class animal:
         self.increase_rate = increase_rate
         self.life_time = life_time
         self.is_alive = True
-
+        self.married_min_age = marriage_age
 
     def is_live(self):
         if self.hunger <= 0 and self.age > self.life_time:
-            self.model.soil_agent.delete_specie_on_soil(self.specie, self.position)
+            self.model.soil_agent.delete_specie_on_soil(self.specie, self, self.position)
             self.model.schedule.remove(self)
             self.is_alive = False
             return False
@@ -45,15 +45,22 @@ class animal:
     def escape(self):
         pass
 
-    def get_married(self, partner_id):
-        if not self.is_married and self.age > 10:
-            self.model.agent.find_agent_by_id(partner_id)  # todo
+    def can_married(self, partner_gender):
+        if self.age > self.married_min_age and not self.is_married and self.is_alive and self.gender != partner_gender:
+            return True
+        else:
+            return False
 
-        self.partner = partner_id
-        self.is_married = True
-        partner_agent = self.find_agent_by_id(partner_id)
-        partner_agent.partner = self.unique_id
-        partner_agent.is_married = True
+    def get_married(self):
+        if not self.is_married and self.age > 10:
+            married_candidate = self.model.soil_agent.map[self.position[0], self.position[1]][self.specie]
+            for partner_agent in married_candidate:
+                if self.can_married(partner_agent.gender) and partner_agent.can_married(self.gender):
+                    self.partner = partner_agent.unique_id
+                    self.is_married = True
+                    partner_agent.partner = self.unique_id
+                    partner_agent.is_married = True
+                    break
 
     def give_birth(self):
         if self.is_married:
@@ -72,77 +79,50 @@ class animal:
                 partner_agent = self.find_agent_by_id(self.partner_id)
                 partner_agent.kids_count += 1
                 partner_agent.kids.append(new_agent_id)
-                self.model.soil_agent.add_specie_on_soil(self.specie, self.position)
+                self.model.soil_agent.add_specie_on_soil(self.specie, new_agent, self.position)
                 self.model.new_agents.append(new_agent)
+
     def move(self, map):
         self.position = self.mathmatics_model.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
         return self.position
 
-class TargetSpecieAgent(Agent, animal):
+class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model):
         Agent.__init__(unique_id, model)
-        animal.__init__(self, 'target_specie', 1, 1, 0.1)
-
+        self.specie_name = 'target_specie'
+        Animal.__init__(self, self.specie_name, 1, 1, 0.1)
+        self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
     def step(self):
         self.hunger -= 2
         self.move(self.model.soil_agent.map)
         self.age += 1
+        if self.can_eat(self.specie_name, self.position, self.increase_rate):
+            if 100 - self.hunger < self.eat_volume:
+                self.hunger = 100
+            else:
+                self.hunger += self.eat_volume
+        self.get_married()
+        self.give_birth()
+        self.is_live()
 
-
-
-class predatorAgent(Agent):
+class PredatorAgent(Agent):
     def __init__(self, unique_id, model):
         Agent.__init__(unique_id, model)
-        animal.__init__(self, 'predator')
+        Animal.__init__(self, 'predator')
 
-class preyAgent(Agent):
+class PreyAgent(Agent):
     def __init__(self, unique_id, model):
         Agent.__init__(unique_id, model)
-        animal.__init__(self, 'prey')
+        Animal.__init__(self, 'prey')
 
 class HumanAgent(Agent):
     def __init__(self, unique_id, model):
         Agent.__init__(unique_id, model)
-        animal.__init__(self, 'human')
+        Animal.__init__(self, 'human')
         self.money = 100
 
-# class BankAgent(Agent):
-#     def __init__(self, unique_id, model):
-#         super().__init__(unique_id, model)
-#         self.money = 10000
-#         self.interest_rate = 0.05
-#
-#     def step(self):
-#         self.money = self.money * (1 + self.interest_rate)
-
-
-# class diseaseAgent(Agent):
-#     def __init__(self, unique_id, model):
-#         super().__init__(unique_id, model)
-#         self.infection_rate = 0.1
-#         self.dead_rate = 0.01
-#         self.time = 0
-#
-#     def is_infect(self):
-#         if random.random() < self.infection_rate:
-#             return True
-#         else:
-#             return False
-#
-#     def change_rate(self):
-#         if self.time > 10:
-#             self.infection_rate += 0.01
-#             self.dead_rate -= 0.01
-#
-#     def step(self, time):
-#         self.time = time
-#         self.change_rate()
-
-
-
-
-class climateAgent(Agent):
+class ClimateAgent(Agent):
     # 季风气候、热带雨林气候、热带草原气候、热带沙漠气候、热带季风气候、热带雨林气候、热带草原气候、热带沙漠气候
     def __init__(self, unique_id, model, type):
         super().__init__(unique_id, model)
@@ -182,17 +162,17 @@ class climateAgent(Agent):
         # if self.climate == 'rainfall':
         #     self.model.water_agents.rainfall()
 
-
 class SoilAgent(Agent):
-    def __init__(self, unique_id, model, specie_list, unaccessible_num):
+    def __init__(self, unique_id, model, specie_list, inaccessible_num):
         super().__init__(unique_id, model)
+
         self.map_width = 100
         self.map_height = 100
         self.map = np.zeros([self.map_width, self.map_height])
         self.specie_list = specie_list
         self.soil_type_all = ['inaccessible', 'empty']
         self.soil_type_all.extend(self.specie_list)
-        self.unaccessible_num = unaccessible_num
+        self.inaccessible_num = inaccessible_num
         self.specie_occupy_density = 0.2
         for i in self.map_width:
             for j in self.map_height:
@@ -202,14 +182,13 @@ class SoilAgent(Agent):
                 self.map[i, j]['main_specie'] = 'empty'
                 self.map[i, j]['carry_ability'] = random.randint(10, 100)
                 for name in self.soil_type_all:
-                    self.soil_specie_num[name] = 0
+                    self.soil_specie_num[name] = []
         self.climate_history = []
-
-
+        self.mathmatics_model = MathmaticsModelIndividual()
 
     def land_init(self):
-        remain_unacciessible_position_number = self.unaccessible_num
-        while remain_unacciessible_position_number > 0:
+        remain_inaccessible_position_number = self.inaccessible_num
+        while remain_inaccessible_position_number > 0:
             x = random.randint(0, self.map_width)
             y = random.randint(0, self.map_height)
 
@@ -217,7 +196,7 @@ class SoilAgent(Agent):
                 self.map[x, y]['is_empty'] = False
                 self.map[x, y]['is_inaccessible'] = True
                 self.map[x, y]['main_specie'] = 'inaccessible'
-                remain_unacciessible_position_number -= 1
+                remain_inaccessible_position_number -= 1
 
     def get_valid_soil(self):
         valid_soil = []
@@ -227,36 +206,23 @@ class SoilAgent(Agent):
                     valid_soil.append((i, j))
         return valid_soil
 
-        # for specie in self.specie_list:
-        #     specie_num = 1
-        #     while specie_num!=0:
-        #         x = random.randint(0, self.map_width)
-        #         y = random.randint(0, self.map_height)
-        #         if self.map[x][y] == 0:
-        #             self.map[x][y] = specie
-        #             specie_num -= 1
-
-        # for i in range(self.map_width):
-        #     for j in range(self.map_height):
-        #         if self.map[i][j] == 0:
-        #             self.map[i][j] = 'empty'
-
     def specie_occupy(self, specie):
         for i in range(self.map_width):
             for j in range(self.map_height):
                 if self.map[i][j]['is_empty']:
-                    if self.specie_occupy_density < self.map[i][j][specie]:
+                    if self.specie_occupy_density < len(self.map[i][j][specie]):
                         self.map[i][j]['main_specie'] = specie
 
-    # add the
-    def add_specie_on_soil(self, specie, position):
+    # add the specie on the soil
+    def add_specie_on_soil(self, specie, specie_agent, position):
         if not self.map[position[0], position[1]]['is_inaccessible']:
-            if self.map[position[0], position[1]][specie] > 0 or self.soil_specie_num[position[0], position[1]]['is_empty']:
-                self.soil_specie_num[position[0], position[1]][specie] += 1
+            if len(self.map[position[0], position[1]][specie]) > 0 or self.soil_specie_num[position[0], position[1]]['is_empty']:
+                if specie_agent not in self.map[position[0], position[1]][specie]:
+                    self.map[position[0], position[1]][specie].append(specie_agent)
 
-    def delete_specie_on_soil(self, specie, position):
-        if self.map[position[0], position[1]][specie] > 0:
-            self.soil_specie_num[position[0], position[1]][specie] -= 1
+    def delete_specie_on_soil(self, specie, specie_agent, position):
+        if len(self.map[position[0], position[1]][specie]) > 0 and specie_agent in self.map[position[0], position[1]][specie]:
+            self.map[position[0], position[1]][specie].remove(specie_agent)
         else:
             print('cannot delete %s on %s' % (specie, str(position)))
 
@@ -273,43 +239,18 @@ class SoilAgent(Agent):
             for j in range(self.map_height):
                 self.map[i][j]['carry_ability'] = self.map[i][j]['carry_ability'] * var
 
+    def can_eat(self, specie, position, increase_rate):
+        position_specie_num = sum(list(map(lambda x: len(x), self.map[position[0], position[1]][specie], self.specie_list)))
+        position_carry_ability = self.map[position[0], position[1]]['carry_ability']
+        if self.mathmatics_model.logistic_growth_individual(position_specie_num, position_carry_ability, increase_rate):
+            return True
+        else:
+            return random.random() < (position_carry_ability/ position_specie_num)
 
     def step(self):
         for specie in self.specie_list:
             self.specie_occupy(specie)
         self.change_soil_carry_ability()
-
-
-
-    #
-    # def remodel(self):
-    #     pass
-    #
-    # def unavailable(self):
-    #     pass
-
-# class HumanLandAgent(Agent):
-#     def __init__(self, unique_id, model):
-#         super().__init__(unique_id, model)
-#         self.age = random.randint(0, 10)
-#
-#     def school(self):
-#         pass
-#
-#     def factory(self):
-#         pass
-#
-#     def farm(self):
-#         pass
-#
-#     def house(self):
-#         pass
-#
-#     def park(self):
-#         pass
-#
-#     def step(self):
-#         pass
 
 class CatastrophesAgent(Agent):
     def __init__(self, unique_id, model):
@@ -327,16 +268,15 @@ class CatastrophesAgent(Agent):
     def step(self):
         pass
 
-
 class EnvModel(Model):
-    def __init__(self, time, specie_dict, unaccessible_num):
+    def __init__(self, time, specie_dict, inaccessible_num):
         self.schedule = mesa.time.SimultaneousActivation(self)
         soil_unique_id = self.next_id
-        solid_agent = SoilAgent(soil_unique_id, self, list(specie_dict.keys()), unaccessible_num)
+        solid_agent = SoilAgent(soil_unique_id, self, list(specie_dict.keys()), inaccessible_num)
         solid_agent.land_init()
         self.schedule.add(solid_agent)
         climate_unique_id = self.next_id
-        self.climate_agent = climateAgent(climate_unique_id, self, 'tropical rain forest climate')
+        self.climate_agent = ClimateAgent(climate_unique_id, self, 'tropical rain forest climate')
         self.climate_agent.climate_style_init()
         self.schedule.add(self.climate_agent)
         # self.water_agents = WaterAgent(self.next_id, self)
@@ -346,7 +286,7 @@ class EnvModel(Model):
                 new_target_id = self.next_id
                 target_specie = TargetSpecieAgent(new_target_id, self)
                 target_specie.position = random.choice(solid_agent.get_valid_soil())
-                solid_agent.add_specie_on_soil(specie, target_specie.position)
+                solid_agent.add_specie_on_soil(specie, target_specie, target_specie.position)
                 self.schedule.add(target_specie)
 
         # self.datacollector = mesa.DataCollector(
@@ -366,18 +306,14 @@ class EnvModel(Model):
 
         self.initial_population += len(self.new_agents)
         self.new_agents = []
-
-
         # self.datacollector.collect(self)
 
-
 # parameters
-
 specie_dict = {'target_specie': 100}
-unaccessible_num = 10
+inaccessible_num = 10
 
 # run the model
-env_model = EnvModel(100, specie_dict, unaccessible_num)
+env_model = EnvModel(100, specie_dict, inaccessible_num)
 for i in range(10):
     env_model.step()
     print(env_model.initial_population)

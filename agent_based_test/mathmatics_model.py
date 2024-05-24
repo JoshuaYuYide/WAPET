@@ -73,6 +73,13 @@ class MathmaticsModelIndividual:
         return K / (1 + ((K - N0) / N0) * np.exp(-r * t))
 
     def logistic_growth_individual(self, N, K, r):
+        """
+        个体层面的连续时间Logistic增长模型。
+        :param N: the population size
+        :param K: the carrying capacity
+        :param r: the intrinsic growth rate
+        :return: the change of the individual growth and eating
+        """
         # 第一次随机：环境调控，决定是否有机会繁殖
         if random.random() < (1 - N / K):
             # 第二次随机：繁殖成功率
