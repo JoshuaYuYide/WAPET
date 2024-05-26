@@ -145,8 +145,30 @@ class MathmaticsModelIndividual:
 
     def position_transfer(self, speed, map, start):
         candidate_position = []
-        for i in range(math.ceil(start[0] - speed), math.floor(start[0] + speed)):
-            for j in range(math.ceil(start[1] - speed), math.floor(start[1] + speed)):
+        width, height = map.shape
+        width_min = math.ceil(start[0] - speed)
+        width_max = math.floor(start[0] + speed)
+        height_min = math.ceil(start[1] - speed)
+        height_max = math.floor(start[1] + speed)
+        if width_min > width - 1:
+            width_min = width - 1
+        elif width_max < 0:
+            width_max = 0
+        if width_max > width - 1:
+            width_max = width - 1
+        elif width_min < 0:
+            width_min = 0
+        if height_min > height - 1:
+            height_min = height - 1
+        elif height_max < 0:
+            height_max = 0
+        if height_max > height - 1:
+            height_max = height - 1
+        elif height_min < 0:
+            height_min = 0
+
+        for i in range(width_min, width_max):
+            for j in range(height_min, height_max):
                 if not map[i, j]['is_inaccessible']:
                     candidate_position.append([i, j])
         if len(candidate_position) == 0:

@@ -65,7 +65,7 @@ class Animal(MathmaticsModelIndividual):
 
     def give_birth(self):
         if self.is_married:
-            N = sum(list(map(lambda x: len(x), self.soil_agent.map[self.position[0], self.position[1]][self.specie], self.soil_agent.specie_list)))
+            N = sum(list(map(lambda x: len(self.model.soil_agent.map[self.position[0], self.position[1]][x]), self.model.soil_agent.specie_list)))
             K = self.model.soil_agent.map[self.position[0], self.position[1]]['carry_ability']
             is_birth = self.logistic_growth_individual(N, K, self.increase_rate)
             if is_birth:
@@ -77,11 +77,12 @@ class Animal(MathmaticsModelIndividual):
                 new_agent.age = 0
                 self.kids_count += 1
                 self.kids.append(new_agent_id)
-                partner_agent = self.find_agent_by_id(self.partner_id)
+                # partner_agent = self.find_agent_by_id(self.partner_id)
+                partner_agent = self.model.specie_all_agents[self.specie][self.partner]
                 partner_agent.kids_count += 1
                 partner_agent.kids.append(new_agent_id)
                 self.model.soil_agent.add_specie_on_soil(self.specie, new_agent, self.position)
-                self.model.new_agents.append(new_agent)
+                self.model.target_specie_new_agents.append(new_agent)
 
     def move(self, map):
         self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
@@ -271,24 +272,30 @@ class CatastrophesAgent(Agent):
 
 class EnvModel(Model):
     def __init__(self, time, specie_dict, inaccessible_num):
+        self.specie_dict = specie_dict
         self.schedule = mesa.time.SimultaneousActivation(self)
         soil_unique_id = self.next_id
-        self.soil_agent = SoilAgent(soil_unique_id, self, list(specie_dict.keys()), inaccessible_num)
+        self.soil_agent = SoilAgent(soil_unique_id, self, list(self.specie_dict.keys()), inaccessible_num)
         self.soil_agent.land_init()
         self.schedule.add(self.soil_agent)
         climate_unique_id = self.next_id
         self.climate_agent = ClimateAgent(climate_unique_id, self, 'tropical rain forest climate')
         self.climate_agent.climate_style_init()
         self.schedule.add(self.climate_agent)
+        self.target_specie_new_agents = []
+        self.specie_all_agents = {}
+
         # self.water_agents = WaterAgent(self.next_id, self)
 
-        for specie in specie_dict.keys():
-            for i in range(int(specie_dict[specie])):
+        for specie in self.specie_dict.keys():
+            self.specie_all_agents[specie] = {}
+            for i in range(int(self.specie_dict[specie])):
                 new_target_id = self.next_id
                 target_specie = TargetSpecieAgent(new_target_id, self)
                 target_specie.position = random.choice(self.soil_agent.get_valid_soil())
                 self.soil_agent.add_specie_on_soil(specie, target_specie, target_specie.position)
                 self.schedule.add(target_specie)
+                self.specie_all_agents[specie][new_target_id] = target_specie
 
         # self.datacollector = mesa.DataCollector(
         #     model_reporters={
@@ -302,11 +309,11 @@ class EnvModel(Model):
         self.schedule.step()
 
         # 在下一个时间步骤中添加新代理
-        for new_agent in self.new_agents:
+        for new_agent in self.target_specie_new_agents:
             self.schedule.add(new_agent)
 
-        self.initial_population += len(self.new_agents)
-        self.new_agents = []
+        self.specie_dict['target_specie'] += len(self.target_specie_new_agents)
+        self.target_specie_new_agents = []
         # self.datacollector.collect(self)
 
 # parameters
@@ -315,9 +322,9 @@ inaccessible_num = 10
 
 # run the model
 env_model = EnvModel(100, specie_dict, inaccessible_num)
-for i in range(10):
+for i in range(100):
     env_model.step()
-    print(env_model.initial_population)
+    print(env_model.specie_dict)
 
 
 
