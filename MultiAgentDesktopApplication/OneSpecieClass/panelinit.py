@@ -74,7 +74,7 @@ class PanelInit():
         self.operation_title.setFont(font)
 
         self.features = ["name", "survival rate", "fecundity", "initial_population", "growth_rate", "carrying_capacity",
-                         "natural_life_span"]
+                         "natural_life_span", "move_speed_mean", "move_speed_std"]
 
         self.species = QComboBox()
         self.species.addItem("target species")
@@ -103,6 +103,15 @@ class PanelInit():
         self.simulation_years = QLineEdit()
         self.simulation_years.setClearButtonEnabled(True)
         self.simulation_years.setText("100")
+        self.move_speed_mean = QLineEdit()
+        self.move_speed_mean.setClearButtonEnabled(True)
+        self.move_speed_mean.setText("2")
+        self.move_speed_std = QLineEdit()
+        self.move_speed_std.setClearButtonEnabled(True)
+        self.move_speed_std.setText("1")
+        self.marriage_age = QLineEdit()
+        self.marriage_age.setClearButtonEnabled(True)
+        self.marriage_age.setText("20")
 
         self.species_submit_bt = QPushButton("Submit")
         self.species_clear_bt = QPushButton("Clear")
@@ -184,18 +193,29 @@ class PanelInit():
         self.specie.addWidget(self.species, 1, 1)
         self.specie.addWidget(QLabel("name:"), 1, 2)
         self.specie.addWidget(self.name, 1, 3)
+        self.specie.addWidget(QLabel("speed mean:"), 1, 4)
+        self.specie.addWidget(self.move_speed_mean, 1, 5)
+
         self.specie.addWidget(QLabel("survival rate:"), 2, 0)
         self.specie.addWidget(self.survival_rate, 2, 1)
         self.specie.addWidget(QLabel("fecundity:"), 2, 2)
         self.specie.addWidget(self.fecundity, 2, 3)
+        self.specie.addWidget(QLabel("speed std:"), 2, 4)
+        self.specie.addWidget(self.move_speed_std, 2, 5)
+
         self.specie.addWidget(QLabel("growth rate:"), 3, 0)
         self.specie.addWidget(self.growth_rate, 3, 1)
-        self.specie.addWidget(QLabel("initial population:"), 3, 2)
+        self.specie.addWidget(QLabel("init population:"), 3, 2)
         self.specie.addWidget(self.initial_population, 3, 3)
-        self.specie.addWidget(QLabel("natural life span:"), 4, 0)
+        self.specie.addWidget(QLabel("marriage age:"), 3, 2)
+        self.specie.addWidget(self.marriage_age, 3, 3)
+
+        self.specie.addWidget(QLabel("maximum age:"), 4, 0)
         self.specie.addWidget(self.natural_life_span, 4, 1)
         self.specie.addWidget(QLabel("carrying capacity:"), 4, 2)
         self.specie.addWidget(self.carrying_capacity, 4, 3)
+        # todo: attack ability, escape ability, alive_ability_change_per_time
+
 
         self.specie_operation = QHBoxLayout()
         self.specie_operation.addWidget(self.species_submit_bt)
