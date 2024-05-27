@@ -3,16 +3,14 @@ import numpy as np
 import pandas as pd
 from mesa import Agent, Model
 from PySide6.QtCore import Slot
-from mathmatics_model import MathmaticsModelGroup, MathmaticsModelIndividual
+from public.mathmatics_model import MathmaticsModel
 import random
-from collections import Counter
 
-
-class Animal(MathmaticsModelIndividual):
+class Animal(MathmaticsModel):
     def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10,
                  fertility_change = -0.001, alive_ability_change_per_time = 0.001, attack_ability = 0.5, escape_ability = 0.5):
         self.cell_neighbors_occupy = 3
-        MathmaticsModelIndividual.__init__(self, self.cell_neighbors_occupy)
+        MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
         self.age = random.randint(0, 10)
         self.gender = random.choice(['male', 'female'])
         self.kids = []
@@ -222,11 +220,11 @@ class ClimateAgent(Agent):
         # if self.climate == 'rainfall':
         #     self.model.water_agents.rainfall()
 
-class SoilAgent(Agent, MathmaticsModelIndividual):
+class SoilAgent(Agent, MathmaticsModel):
     def __init__(self, unique_id, model, specie_list, inaccessible_num):
         super().__init__(unique_id=unique_id, model=model)
         self.cell_neighbors_occupy = 3
-        MathmaticsModelIndividual.__init__(self, self.cell_neighbors_occupy)
+        MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
 
         self.map_width = 100
         self.map_height = 100
@@ -389,38 +387,5 @@ class EnvModel(Model):
             self.specie_dict[specie]['population'] += self.new_agents_dict[specie]
             self.new_agents_dict[specie] = 0
         # self.datacollector.collect(self)
-
-# parameters
-# specie_dict = {'target_specie': 100}
-specie_dict = {'target_specie': {'population': 100, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1},
-               'predator': {'population': 10, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1},
-               'prey': {'population': 100, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1}}
-inaccessible_num = 10
-
-# run the model
-env_model = EnvModel(100, specie_dict, inaccessible_num)
-for i in range(100):
-    env_model.step()
-    print(env_model.specie_dict)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
