@@ -9,7 +9,8 @@ from collections import Counter
 
 
 class Animal(MathmaticsModelIndividual):
-    def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10):
+    def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10,
+                 fertility_change = -0.001, alive_ability_change_per_time = 0.001):
         self.cell_neighbors_occupy = 3
         MathmaticsModelIndividual.__init__(self, self.cell_neighbors_occupy)
         self.age = random.randint(0, 10)
@@ -30,6 +31,8 @@ class Animal(MathmaticsModelIndividual):
         self.life_time = life_time
         self.is_alive = True
         self.married_min_age = marriage_age
+        self.fertility_change = fertility_change
+        self.alive_ability_change_per_time = alive_ability_change_per_time
 
     def is_live(self):
         if self.hunger <= 0 and self.age > self.life_time:
@@ -67,7 +70,7 @@ class Animal(MathmaticsModelIndividual):
         if self.is_married:
             N = sum(list(map(lambda x: len(self.model.soil_agent.map[self.position[0], self.position[1]][x]), self.model.soil_agent.specie_list)))
             K = self.model.soil_agent.map[self.position[0], self.position[1]]['carry_ability']
-            is_birth = self.logistic_growth_individual(N, K, self.increase_rate)
+            is_birth = self.logistic_growth_individual(N, K, self.increase_rate, self.fertility_change * (self.age - self.married_min_age))
             if is_birth:
                 new_agent_id = self.model.next_id
                 new_agent = TargetSpecieAgent(new_agent_id, self.model)
@@ -75,6 +78,7 @@ class Animal(MathmaticsModelIndividual):
                 new_agent.parents = [self.unique_id, self.partner]
                 new_agent.parents_count = 2
                 new_agent.age = 0
+                new_agent.birthday = self.model.schedule.time
                 self.kids_count += 1
                 self.kids.append(new_agent_id)
                 # partner_agent = self.find_agent_by_id(self.partner_id)
@@ -88,18 +92,20 @@ class Animal(MathmaticsModelIndividual):
         self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
         return self.position
 
+    def growth(self):
+        self.age += 1
+        self.hunger -= 2
+
 class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.specie_name = 'target_specie'
-        Animal.__init__(self, self.specie_name, 1, 1, 0.1)
+        Animal.__init__(self, self.specie_name, 1, 1, 0.1, 100, 20, -0.001, 0.001)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
     def step(self):
-        self.hunger -= 2
         self.move(self.model.soil_agent.map)
-        self.age += 1
-        if self.model.soil_agent.can_eat(self.specie_name, self.position, self.increase_rate):
+        if self.model.soil_agent.can_eat(self, self.position, self.increase_rate):
             if 100 - self.hunger < self.eat_volume:
                 self.hunger = 100
             else:
@@ -107,6 +113,7 @@ class TargetSpecieAgent(Agent, Animal):
         self.get_married()
         self.give_birth()
         self.is_live()
+        self.growth()
 
 class PredatorAgent(Agent):
     def __init__(self, unique_id, model):
@@ -170,7 +177,6 @@ class SoilAgent(Agent, MathmaticsModelIndividual):
         super().__init__(unique_id=unique_id, model=model)
         self.cell_neighbors_occupy = 3
         MathmaticsModelIndividual.__init__(self, self.cell_neighbors_occupy)
-
 
         self.map_width = 100
         self.map_height = 100
@@ -244,10 +250,13 @@ class SoilAgent(Agent, MathmaticsModelIndividual):
             for j in range(self.map_height):
                 self.map[i][j]['carry_ability'] = self.map[i][j]['carry_ability'] * var
 
-    def can_eat(self, specie, position, increase_rate):
+    def can_eat(self, specie_agent, position, increase_rate):
         N = sum(list(map(lambda x: len(self.map[position[0], position[1]][x]), self.specie_list)))
         K = self.map[position[0], position[1]]['carry_ability']
-        return self.logistic_growth_individual(N, K, increase_rate)
+        if specie_agent.married_min_age > specie_agent.age:
+            return self.logistic_growth_individual(N, K, increase_rate, 1)
+        else:
+            return self.logistic_growth_individual(N, K, increase_rate, specie_agent.fertility_change * (specie_agent.age - specie_agent.married_min_age))
 
     def step(self):
         for specie in self.specie_list:
@@ -289,7 +298,7 @@ class EnvModel(Model):
 
         for specie in self.specie_dict.keys():
             self.specie_all_agents[specie] = {}
-            for i in range(int(self.specie_dict[specie])):
+            for i in range(int(self.specie_dict[specie]['population'])):
                 new_target_id = self.next_id
                 target_specie = TargetSpecieAgent(new_target_id, self)
                 target_specie.position = random.choice(self.soil_agent.get_valid_soil())
@@ -312,12 +321,13 @@ class EnvModel(Model):
         for new_agent in self.target_specie_new_agents:
             self.schedule.add(new_agent)
 
-        self.specie_dict['target_specie'] += len(self.target_specie_new_agents)
+        self.specie_dict['target_specie']['population'] += len(self.target_specie_new_agents)
         self.target_specie_new_agents = []
         # self.datacollector.collect(self)
 
 # parameters
-specie_dict = {'target_specie': 100}
+# specie_dict = {'target_specie': 100}
+specie_dict = {'target_specie': {'population': 100, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1}}
 inaccessible_num = 10
 
 # run the model
