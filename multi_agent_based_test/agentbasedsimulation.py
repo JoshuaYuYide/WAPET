@@ -10,7 +10,7 @@ from collections import Counter
 
 class Animal(MathmaticsModelIndividual):
     def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10,
-                 fertility_change = -0.001, alive_ability_change_per_time = 0.001):
+                 fertility_change = -0.001, alive_ability_change_per_time = 0.001, attack_ability = 0.5, escape_ability = 0.5):
         self.cell_neighbors_occupy = 3
         MathmaticsModelIndividual.__init__(self, self.cell_neighbors_occupy)
         self.age = random.randint(0, 10)
@@ -33,20 +33,52 @@ class Animal(MathmaticsModelIndividual):
         self.married_min_age = marriage_age
         self.fertility_change = fertility_change
         self.alive_ability_change_per_time = alive_ability_change_per_time
+        self.attack_ability = attack_ability
+        self.escape_ability = escape_ability
 
     def is_live(self):
         if self.hunger <= 0 and self.age > self.life_time:
-            self.model.soil_agent.delete_specie_on_soil(self.specie, self, self.position)
-            self.model.schedule.remove(self)
+            self.model.soil_agent.delete_specie_on_soil(self)
             self.is_alive = False
             return False
         else:
             return True
 
-    def attach(self):
-        pass
+    def new_attack_ability(self):
+        if self.age <= self.married_min_age:
+            attack_ability = self.age * self.alive_ability_change_per_time * self.attack_ability
+        else:
+            attack_ability = (self.age - self.married_min_age)**(1/2) * self.age * self.alive_ability_change_per_time * self.attack_ability
+        return attack_ability
 
-    def escape(self):
+    def new_escape_ability(self):
+        if self.age <= self.married_min_age:
+            escape_ability = self.age * self.alive_ability_change_per_time * self.escape_ability
+        else:
+            escape_ability = (self.age - self.married_min_age)**(1/2) * self.age * self.alive_ability_change_per_time * self.escape_ability
+        return escape_ability
+
+    def attack(self, prey_specie_name):
+        if len(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name]) > 0:
+            prey_agent = random.choice(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name])
+            prey_escape = [True, False]
+            predator_attack = [True, False]
+            prey_escape_prob = [prey_agent.new_escape_ability(), 1 - prey_agent.new_escape_ability()]
+            predator_attack_prob = [self.new_attack_ability(), 1 - self.new_attack_ability()]
+            escape = np.random.choice(prey_escape, p = prey_escape_prob)
+            attack = np.random.choice(predator_attack, p = predator_attack_prob)
+            if attack and not escape:
+                prey_agent.is_alive = False
+                self.model.soil_agent.delete_specie_on_soil(prey_agent)
+                self.hunger += self.eat_volume
+                # self.model.soil_agent.map[self.position[0], self.position[1]]
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def escape(self, predator_agent):
         pass
 
     def can_married(self, partner_gender):
@@ -86,7 +118,8 @@ class Animal(MathmaticsModelIndividual):
                 partner_agent.kids_count += 1
                 partner_agent.kids.append(new_agent_id)
                 self.model.soil_agent.add_specie_on_soil(self.specie, new_agent, self.position)
-                self.model.target_specie_new_agents.append(new_agent)
+                self.model.new_agents_dict[self.specie] += 1
+                self.model.schedule.add(new_agent)
 
     def move(self, map):
         self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
@@ -96,10 +129,43 @@ class Animal(MathmaticsModelIndividual):
         self.age += 1
         self.hunger -= 2
 
+
 class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.specie_name = 'target_specie'
+        Animal.__init__(self, self.specie_name, 1, 1, 0.1, 100, 20, -0.001, 0.001)
+        self.eat_volume = 10  # the volume of food that the agent can eat at one time
+
+    def step(self):
+        self.move(self.model.soil_agent.map)
+        self.attack('prey')
+        self.get_married()
+        self.give_birth()
+        self.is_live()
+        self.growth()
+
+# 捕猎者
+class PredatorAgent(Agent, Animal):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.specie_name = 'predator'
+        Animal.__init__(self, self.specie_name, 1, 1, 0.1, 100, 20, -0.001, 0.001)
+        self.eat_volume = 10  # the volume of food that the agent can eat at one time
+
+    def step(self):
+        self.move(self.model.soil_agent.map)
+        self.attack('target_specie')
+        self.get_married()
+        self.give_birth()
+        self.is_live()
+        self.growth()
+
+# 猎物
+class PreyAgent(Agent, Animal):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.specie_name = 'prey'
         Animal.__init__(self, self.specie_name, 1, 1, 0.1, 100, 20, -0.001, 0.001)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
@@ -115,21 +181,11 @@ class TargetSpecieAgent(Agent, Animal):
         self.is_live()
         self.growth()
 
-class PredatorAgent(Agent):
-    def __init__(self, unique_id, model):
-        Agent.__init__(unique_id, model)
-        Animal.__init__(self, 'predator')
-
-class PreyAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        Animal.__init__(self, 'prey')
-
-class HumanAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        Animal.__init__(self, 'human')
-        self.money = 100
+# class HumanAgent(Agent):
+#     def __init__(self, unique_id, model):
+#         super().__init__(unique_id, model)
+#         Animal.__init__(self, 'human')
+#         self.money = 100
 
 class ClimateAgent(Agent):
     # 季风气候、热带雨林气候、热带草原气候、热带沙漠气候、热带季风气候、热带雨林气候、热带草原气候、热带沙漠气候
@@ -231,9 +287,12 @@ class SoilAgent(Agent, MathmaticsModelIndividual):
                 if specie_agent not in self.map[position[0], position[1]][specie]:
                     self.map[position[0], position[1]][specie].append(specie_agent)
 
-    def delete_specie_on_soil(self, specie, specie_agent, position):
+    def delete_specie_on_soil(self, specie_agent):
+        specie = specie_agent.specie_name
+        position = specie_agent.position
         if len(self.map[position[0], position[1]][specie]) > 0 and specie_agent in self.map[position[0], position[1]][specie]:
             self.map[position[0], position[1]][specie].remove(specie_agent)
+            self.model.schedule.remove(specie_agent)
         else:
             print('cannot delete %s on %s' % (specie, str(position)))
 
@@ -291,8 +350,11 @@ class EnvModel(Model):
         self.climate_agent = ClimateAgent(climate_unique_id, self, 'tropical rain forest climate')
         self.climate_agent.climate_style_init()
         self.schedule.add(self.climate_agent)
-        self.target_specie_new_agents = []
+        self.new_agents_dict = {}
         self.specie_all_agents = {}
+
+        for specie in self.specie_dict.keys():
+            self.new_agents_dict[specie] = 0
 
         # self.water_agents = WaterAgent(self.next_id, self)
 
@@ -300,11 +362,19 @@ class EnvModel(Model):
             self.specie_all_agents[specie] = {}
             for i in range(int(self.specie_dict[specie]['population'])):
                 new_target_id = self.next_id
-                target_specie = TargetSpecieAgent(new_target_id, self)
+                if specie == 'target_specie':
+                    target_specie = TargetSpecieAgent(new_target_id, self)
+                elif specie == 'predator':
+                    target_specie = PredatorAgent(new_target_id, self)
+                elif specie == 'prey':
+                    target_specie = PreyAgent(new_target_id, self)
+                # target_specie = TargetSpecieAgent(new_target_id, self)
                 target_specie.position = random.choice(self.soil_agent.get_valid_soil())
                 self.soil_agent.add_specie_on_soil(specie, target_specie, target_specie.position)
                 self.schedule.add(target_specie)
                 self.specie_all_agents[specie][new_target_id] = target_specie
+
+
 
         # self.datacollector = mesa.DataCollector(
         #     model_reporters={
@@ -317,17 +387,20 @@ class EnvModel(Model):
     def step(self):
         self.schedule.step()
 
-        # 在下一个时间步骤中添加新代理
-        for new_agent in self.target_specie_new_agents:
-            self.schedule.add(new_agent)
+        # # 在下一个时间步骤中添加新代理
+        # for new_agent in self.target_specie_new_agents:
+        #     self.schedule.add(new_agent)
 
-        self.specie_dict['target_specie']['population'] += len(self.target_specie_new_agents)
-        self.target_specie_new_agents = []
+        for specie in self.specie_dict.keys():
+            self.specie_dict[specie]['population'] += self.new_agents_dict[specie]
+            self.new_agents_dict[specie] = 0
         # self.datacollector.collect(self)
 
 # parameters
 # specie_dict = {'target_specie': 100}
-specie_dict = {'target_specie': {'population': 100, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1}}
+specie_dict = {'target_specie': {'population': 100, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1},
+               'predator': {'population': 10, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1},
+               'prey': {'population': 100, 'alive_ability_change_per_time': 0.1, 'fertility_change_per_time': -0.1}}
 inaccessible_num = 10
 
 # run the model
