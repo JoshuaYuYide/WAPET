@@ -37,6 +37,8 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
         self.species_submit_bt.clicked.connect(self.submit_species_func)
         self.species_clear_bt.clicked.connect(self.clear_species_func)
         self.species_delete_bt.clicked.connect(self.delete_species_func)
+        self.species_random_bt.clicked.connect(self.random_species_func)
+
         self.clear_table_bt.clicked.connect(self.clear_table_func)
         self.plot.clicked.connect(self.plot_data)
         self.slider_year.valueChanged.connect(self.update_piechart)
@@ -46,22 +48,30 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
         self.species_table.cellChanged.connect(self.check_species_table)
         self.clear_table_bt.clicked.connect(self.check_species_table)
 
-        # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_specie)
-        self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_individual)
+        self.mr_clear_bt.clicked.connect(self.clear_map)
+        self.mr_generate_bt.clicked.connect(self.generate_map_inaccessible)
 
+        # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_specie)
+        # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_individual)
 
         # check
-        self.name.textChanged.connect(self.check_disable)
-        self.survival_rate.textChanged.connect(self.check_disable)
-        self.fecundity.textChanged.connect(self.check_disable)
-        self.initial_population.textChanged.connect(self.check_disable)
-        self.growth_rate.textChanged.connect(self.check_disable)
-        self.carrying_capacity.textChanged.connect(self.check_disable)
-        self.natural_life_span.textChanged.connect(self.check_disable)
+        self.name.textChanged.connect(self.check_disable_specie_data)
+        self.survival_rate.textChanged.connect(self.check_disable_specie_data)
+        self.fecundity.textChanged.connect(self.check_disable_specie_data)
+        self.initial_population.textChanged.connect(self.check_disable_specie_data)
+        self.growth_rate.textChanged.connect(self.check_disable_specie_data)
+        self.carrying_capacity.textChanged.connect(self.check_disable_specie_data)
+        self.natural_life_span.textChanged.connect(self.check_disable_specie_data)
+        self.move_speed_mean.textChanged.connect(self.check_disable_specie_data)
+        self.move_speed_std.textChanged.connect(self.check_disable_specie_data)
+        self.marriage_age.textChanged.connect(self.check_disable_specie_data)
+        self.attack_ability.textChanged.connect(self.check_disable_specie_data)
+        self.escape_ability.textChanged.connect(self.check_disable_specie_data)
+        self.alive_ability_change_per_time.textChanged.connect(self.check_disable_specie_data)
+        self.fecundity_attenuation.textChanged.connect(self.check_disable_specie_data)
 
         self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 0))
         self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 1))
-        self.mr_button_draw_3.clicked.connect(lambda: set_color(self.mr_grid_widget, 2))
 
         def set_color(grid_widget, color_index):
             grid_widget.current_color = color_index

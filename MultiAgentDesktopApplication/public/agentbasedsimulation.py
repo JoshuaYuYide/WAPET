@@ -5,6 +5,7 @@ from mesa import Agent, Model
 from PySide6.QtCore import Slot
 from public.mathmatics_model import MathmaticsModel
 import random
+from collections import Counter
 
 class Animal(MathmaticsModel):
     def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10,
@@ -19,7 +20,6 @@ class Animal(MathmaticsModel):
         self.parents_count = 0
         self.partner = None
         self.specie = specie
-        self.move_speed = 1
         self.position = [-1, -1]
         self.hunger = 100
         self.move_speed_mean = move_speed_mean
@@ -126,7 +126,6 @@ class Animal(MathmaticsModel):
     def growth(self):
         self.age += 1
         self.hunger -= 2
-
 
 class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model):
@@ -313,22 +312,6 @@ class SoilAgent(Agent, MathmaticsModel):
         for specie in self.specie_list:
             self.specie_occupy(specie)
         self.change_soil_carry_ability()
-
-class CatastrophesAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-
-    def earthquake(self):
-        pass
-
-    def flood(self):
-        pass
-
-    def drought(self):
-        pass
-
-    def step(self):
-        pass
 
 class EnvModel(Model):
     def __init__(self, time, specie_dict, inaccessible_num):
