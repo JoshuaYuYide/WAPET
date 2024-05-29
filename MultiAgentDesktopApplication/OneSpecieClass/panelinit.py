@@ -406,3 +406,10 @@ class GridWidget(QWidget):
             for j in range(self.grid_size):
                 result[self.grid[i][j]].append((i, j))
         return result
+
+    def get_map_name(self):
+        return str(self.grid_size)
+
+    def draw_species(self, specie_pos, specie_type):
+        self.grid[specie_pos[0]][specie_pos[1]] = specie_type
+        self.update()

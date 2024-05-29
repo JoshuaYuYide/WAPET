@@ -12,16 +12,16 @@ from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBo
 
 from OneSpecieClass.help import Help
 from OneSpecieClass.panelinit import PanelInit, GridWidget
-from OneSpecieClass.tableoperation import TableOperation
 from OneSpecieClass.visualization import Visulization
 from OneSpecieClass.check import Check
 from OneSpecieClass.updatepanel import UpdatePanel
 from OneSpecieClass.calculated import Calculate
 
 
-class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, UpdatePanel, Calculate):
+class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calculate):
     def __init__(self):
         super().__init__()
+        UpdatePanel.__init__(self)
 
         self.time = 0
 
@@ -52,7 +52,7 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
         self.mr_generate_bt.clicked.connect(self.generate_map_inaccessible)
         self.mr_random_bt.clicked.connect(self.random_map_parameter)
 
-        # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_specie)
+        self.simulate.clicked.connect(self.simulate_one_specie_individual)
         # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_individual)
 
         # check
@@ -71,8 +71,8 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
         self.alive_ability_change_per_time.textChanged.connect(self.check_disable_specie_data)
         self.fecundity_attenuation.textChanged.connect(self.check_disable_specie_data)
 
-        self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 0))
-        self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 1))
+        self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 'empty'))
+        self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 'inaccessible'))
 
         def set_color(grid_widget, color_index):
             grid_widget.current_color = color_index

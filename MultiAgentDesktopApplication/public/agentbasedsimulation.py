@@ -57,7 +57,7 @@ class Animal(MathmaticsModel):
         return escape_ability
 
     def attack(self, prey_specie_name):
-        if len(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name]) > 0:
+        if prey_specie_name in list(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name].keys()):
             prey_agent = random.choice(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name])
             prey_escape = [True, False]
             predator_attack = [True, False]
@@ -136,7 +136,13 @@ class TargetSpecieAgent(Agent, Animal):
 
     def step(self):
         self.move(self.model.soil_agent.map)
-        self.attack('prey')
+        # self.attack('prey')
+        if self.model.soil_agent.can_eat(self, self.position, self.increase_rate):
+            if 100 - self.hunger < self.eat_volume:
+                self.hunger = 100
+            else:
+                self.hunger += self.eat_volume
+
         self.get_married()
         self.give_birth()
         self.is_live()
@@ -225,8 +231,8 @@ class SoilAgent(Agent, MathmaticsModel):
         self.cell_neighbors_occupy = 3
         MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
 
-        self.map_width = 100
-        self.map_height = 100
+        self.map_width = 10
+        self.map_height = 10
         self.map = np.empty([self.map_width, self.map_height], dtype=object)
         self.specie_list = specie_list
         self.soil_type_all = ['inaccessible', 'empty']
@@ -314,7 +320,7 @@ class SoilAgent(Agent, MathmaticsModel):
         self.change_soil_carry_ability()
 
 class EnvModel(Model):
-    def __init__(self, time, specie_dict, inaccessible_num):
+    def __init__(self, specie_dict, inaccessible_num):
         self.specie_dict = specie_dict
         self.schedule = mesa.time.SimultaneousActivation(self)
         soil_unique_id = self.next_id
@@ -335,7 +341,8 @@ class EnvModel(Model):
 
         for specie in self.specie_dict.keys():
             self.specie_all_agents[specie] = {}
-            for i in range(int(self.specie_dict[specie]['population'])):
+            self.specie_dict[specie]['population'] = int(self.specie_dict[specie]['population'])
+            for i in range(self.specie_dict[specie]['population']):
                 new_target_id = self.next_id
                 if specie == 'target_specie':
                     target_specie = TargetSpecieAgent(new_target_id, self)
@@ -348,9 +355,6 @@ class EnvModel(Model):
                 self.soil_agent.add_specie_on_soil(specie, target_specie, target_specie.position)
                 self.schedule.add(target_specie)
                 self.specie_all_agents[specie][new_target_id] = target_specie
-
-
-
         # self.datacollector = mesa.DataCollector(
         #     model_reporters={
         #         "population": lambda m: len(m.fish_agents),

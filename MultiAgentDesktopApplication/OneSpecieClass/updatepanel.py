@@ -10,7 +10,12 @@ from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBo
 
 class UpdatePanel:
     def __init__(self):
-        pass
+        self.specie_table_rowname = ["species", "name", "survival rate", "fecundity",
+                                                    "initial population", "growth rate",
+                                                    "maximum age", "speed mean", "speed std", "marriage age",
+                                                    "attack ability", "escape ability", "alive ability change rate",
+                                                    "fecundity attenuation", "climate type", "carrying capacity",
+                                                    "simulation months", "map"]
 
     @Slot()
     def submit_species_func(self):
@@ -32,7 +37,7 @@ class UpdatePanel:
         self.species_table.setItem(14, self.species_items, QTableWidgetItem(self.climate_type.currentText()))
         self.species_table.setItem(15, self.species_items, QTableWidgetItem(self.carrying_capacity.text()))
         self.species_table.setItem(16, self.species_items, QTableWidgetItem(self.simulation_years.text()))
-        # todo
+        self.species_table.setItem(17, self.species_items, QTableWidgetItem(self.mr_grid_widget.get_map_name()))
         self.species_items += 1
 
 
@@ -44,14 +49,9 @@ class UpdatePanel:
         self.result_items = 0
 
     def reset_species_table(self):
-        self.species_table.setRowCount(17)
+        self.species_table.setRowCount(18)
         self.species_table.setColumnCount(0)
-        self.species_table.setVerticalHeaderLabels(["species", "name", "survival rate", "fecundity",
-                                                    "initial population", "growth rate",
-                                                    "maximum age", "speed mean", "speed std", "marriage age",
-                                                    "attack ability", "escape ability", "alive ability change rate",
-                                                    "fecundity attenuation", "climate type", "carrying capacity",
-                                                    "simulation months"])
+        self.species_table.setVerticalHeaderLabels(self.specie_table_rowname)
         self.species_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.species_items = 0
 
@@ -98,7 +98,6 @@ class UpdatePanel:
         self.climate_type.setCurrentIndex(random.randint(0, 3))
         self.simulation_years.setText(str(random.randint(1, 100)))
 
-
     @Slot()
     def delete_species_func(self):
         self.species_table.removeColumn(self.species_table.currentColumn())
@@ -111,14 +110,14 @@ class UpdatePanel:
         self.mr_grid_widget.clear()
         max_num = int(self.mr_map_size.text())
         self.mr_grid_widget.resize_map(max_num)
-        inaccesible_num = int(self.mr_inaccessible_number.text())
-        inaccesible_list = []
+        inaccessible_num = int(self.mr_inaccessible_number.text())
+        inaccessible_list = []
 
-        for _ in range(inaccesible_num):
-            inaccesible_pos = [random.randint(0, max_num - 1), random.randint(0, max_num - 1)]
-            if inaccesible_pos not in inaccesible_list:
-                self.mr_grid_widget.draw_inaccessible(inaccesible_pos)
-                inaccesible_list.append(inaccesible_pos)
+        for _ in range(inaccessible_num):
+            inaccessible_pos = [random.randint(0, max_num - 1), random.randint(0, max_num - 1)]
+            if inaccessible_pos not in inaccessible_list:
+                self.mr_grid_widget.draw_inaccessible(inaccessible_pos)
+                inaccessible_list.append(inaccessible_pos)
 
     @Slot()
     def clear_map(self):

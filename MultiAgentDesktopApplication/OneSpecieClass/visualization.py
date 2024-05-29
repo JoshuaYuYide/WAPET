@@ -37,6 +37,13 @@ class Visulization:
         self.slider_right.setText(str(self.slider_year.maximum()) + '/month')
         self.slider_left.setText(str(self.slider_year.minimum()) + '/month')
 
+
+        self.model
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                self.soil_agent.grid[x][y]
+        self.mr_grid_widget.draw_species('target species')
+
     def plot_network(self):
         G = nx.Graph()
         G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1)])
