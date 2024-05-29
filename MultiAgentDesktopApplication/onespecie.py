@@ -50,6 +50,7 @@ class OneSpecie(QWidget, Help, PanelInit, TableOperation, Visulization, Check, U
 
         self.mr_clear_bt.clicked.connect(self.clear_map)
         self.mr_generate_bt.clicked.connect(self.generate_map_inaccessible)
+        self.mr_random_bt.clicked.connect(self.random_map_parameter)
 
         # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_specie)
         # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_individual)

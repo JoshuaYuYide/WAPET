@@ -355,9 +355,11 @@ class GridWidget(QWidget):
         super().__init__()
 
         self.grid_size = num_grid  # 格子的大小
-        self.grid = [[0 for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # 格子的状态
-        self.colors = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0)]  # 格子的颜色
-        self.current_color = 0  # 当前选中的颜色
+        self.grid = [['empty' for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # 格子的状态
+        # self.colors = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0), QColor(0, 0, 255), QColor(255, 255, 0)]  # 格子的颜色
+        self.colors = {'empty': QColor(255, 255, 255), 'inaccessible':QColor(255, 0, 0), 'target species': QColor(0, 255, 0), 'predator': QColor(0, 0, 255),
+                       'prey': QColor(255, 255, 0)}  # grid colors
+        self.current_color = 'empty'  # 当前选中的颜色
 
     def mousePressEvent(self, event):
         cell_size = min(self.width(), self.height()) / self.grid_size
@@ -386,9 +388,21 @@ class GridWidget(QWidget):
                 painter.fillRect(x * cell_size + 1, y * cell_size + 1, cell_size - 1, cell_size - 1, color)
 
     def clear(self):
-        self.grid = [[0 for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+        self.grid = [['empty' for _ in range(self.grid_size)] for _ in range(self.grid_size)]
         self.update()
 
     def draw_inaccessible(self, inaccessible_pos):
-        self.grid[inaccessible_pos[0]][inaccessible_pos[1]] = 1
+        self.grid[inaccessible_pos[0]][inaccessible_pos[1]] = 'inaccessible'
         self.update()
+
+    def resize_map(self, num_grid):
+        self.grid_size = num_grid
+        self.grid = [['empty' for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+        self.update()
+
+    def read_map(self):
+        result = {"inaccessible": [], "empty": [], "target species": [], "predator": [], "prey": []}
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                result[self.grid[i][j]].append((i, j))
+        return result

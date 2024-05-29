@@ -32,6 +32,7 @@ class UpdatePanel:
         self.species_table.setItem(14, self.species_items, QTableWidgetItem(self.climate_type.currentText()))
         self.species_table.setItem(15, self.species_items, QTableWidgetItem(self.carrying_capacity.text()))
         self.species_table.setItem(16, self.species_items, QTableWidgetItem(self.simulation_years.text()))
+        # todo
         self.species_items += 1
 
 
@@ -108,12 +109,13 @@ class UpdatePanel:
     @Slot()
     def generate_map_inaccessible(self):
         self.mr_grid_widget.clear()
-        max_num = int(self.mr_map_size.text()) - 1
+        max_num = int(self.mr_map_size.text())
+        self.mr_grid_widget.resize_map(max_num)
         inaccesible_num = int(self.mr_inaccessible_number.text())
         inaccesible_list = []
 
-        for i in range(inaccesible_num):
-            inaccesible_pos = [random.randint(0, max_num), random.randint(0, max_num)]
+        for _ in range(inaccesible_num):
+            inaccesible_pos = [random.randint(0, max_num - 1), random.randint(0, max_num - 1)]
             if inaccesible_pos not in inaccesible_list:
                 self.mr_grid_widget.draw_inaccessible(inaccesible_pos)
                 inaccesible_list.append(inaccesible_pos)
@@ -125,3 +127,9 @@ class UpdatePanel:
     @Slot()
     def read_map(self):
         self.mr_grid_widget.read_map()
+
+    @Slot()
+    def random_map_parameter(self):
+        map_size = random.randint(1, 10)
+        self.mr_map_size.setText(str(map_size))
+        self.mr_inaccessible_number.setText(str(random.randint(1, map_size)))
