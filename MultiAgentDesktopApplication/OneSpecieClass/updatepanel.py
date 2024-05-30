@@ -40,7 +40,6 @@ class UpdatePanel:
         self.species_table.setItem(17, self.species_items, QTableWidgetItem(self.mr_grid_widget.get_map_name()))
         self.species_items += 1
 
-
     def reset_result_table(self):
         self.result_table.setColumnCount(2)
         self.result_table.setRowCount(0)
@@ -111,13 +110,13 @@ class UpdatePanel:
         max_num = int(self.mr_map_size.text())
         self.mr_grid_widget.resize_map(max_num)
         inaccessible_num = int(self.mr_inaccessible_number.text())
-        inaccessible_list = []
+        self.inaccessible_list = []
 
         for _ in range(inaccessible_num):
             inaccessible_pos = [random.randint(0, max_num - 1), random.randint(0, max_num - 1)]
-            if inaccessible_pos not in inaccessible_list:
+            if inaccessible_pos not in self.inaccessible_list:
                 self.mr_grid_widget.draw_inaccessible(inaccessible_pos)
-                inaccessible_list.append(inaccessible_pos)
+                self.inaccessible_list.append(inaccessible_pos)
 
     @Slot()
     def clear_map(self):

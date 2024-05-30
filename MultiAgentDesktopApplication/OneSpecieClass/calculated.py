@@ -45,32 +45,32 @@ class Calculate(MathmaticsModel):
     @Slot()
     def simulate_one_specie_individual(self):
         result = {}
-        result['target species'] = {}
+        result['target specie'] = {}
         result['predator'] = {}
         result['prey'] = {}
 
         for i in range(self.species_table.columnCount()):
-            j = 0
-            if j == 0 and self.species_table.item(j,i).text() == 'target species':
+            if self.species_table.item(0,i).text() == 'target specie':
                 for j in range(self.species_table.rowCount()):
-                    result['target species'][self.specie_table_rowname[j]] = self.species_table.item(j,i).text()
-            elif j == 0 and self.species_table.item(j,i).text() == 'predator':
+                    result['target specie'][self.specie_table_rowname[j]] = self.species_table.item(j,i).text()
+            elif self.species_table.item(0,i).text() == 'predator':
                 for j in range(self.species_table.rowCount()):
                     result['predator'][self.specie_table_rowname[j]] = self.species_table.item(j,i).text()
-            elif j == 0 and self.species_table.item(j,i).text() == 'prey':
+            elif self.species_table.item(0,i).text() == 'prey':
                 for j in range(self.species_table.rowCount()):
                     result['prey'][self.specie_table_rowname[j]] = self.species_table.item(j,i).text()
 
-        total_time = result['target species']['simulation months']
-        specie_dict = {'target_specie': {'population': result['target species']['initial population'],
-                                         'alive_ability_change_per_time': result['target species']['alive ability change rate'],
-                                         'fertility_change_per_time': result['target species']['alive ability change rate']}}
-        inaccessible_num = int(self.mr_inaccessible_number.text())
-        model = EnvModel(specie_dict, inaccessible_num)
+        total_time = result['target specie']['simulation months']
+        specie_dict = {'target_specie': {'population': result['target specie']['initial population'],
+                                         'alive_ability_change_per_time': result['target specie']['alive ability change rate'],
+                                         'fertility_change_per_time': result['target specie']['alive ability change rate']}}
+        # inaccessible_num = int(self.mr_inaccessible_number.text())
+
+        self.model = EnvModel(specie_dict, self.inaccessible_list, self.mr_grid_widget.grid_size)
         for time in range(int(total_time)):
-            model.step()
+            self.model.step()
             self.result_table.insertRow(time)
-            self.result_table.setItem(time, 0, QTableWidgetItem(str(model.specie_dict['target_specie']['population'])))
+            self.result_table.setItem(time, 0, QTableWidgetItem(str(self.model.specie_dict['target_specie']['population'])))
             self.result_table.setItem(time, 1, QTableWidgetItem(str(time)))
 
 

@@ -78,7 +78,7 @@ class PanelInit():
 
         # specie data management
         self.species = QComboBox()
-        self.species.addItem("target species")
+        self.species.addItem("target specie")
         self.name = QLineEdit()
         self.name.setClearButtonEnabled(True)
         self.name.setText('fish')
@@ -357,7 +357,7 @@ class GridWidget(QWidget):
         self.grid_size = num_grid  # 格子的大小
         self.grid = [['empty' for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # 格子的状态
         # self.colors = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0), QColor(0, 0, 255), QColor(255, 255, 0)]  # 格子的颜色
-        self.colors = {'empty': QColor(255, 255, 255), 'inaccessible':QColor(255, 0, 0), 'target species': QColor(0, 255, 0), 'predator': QColor(0, 0, 255),
+        self.colors = {'empty': QColor(255, 255, 255), 'inaccessible':QColor(255, 0, 0), 'target specie': QColor(0, 255, 0), 'predator': QColor(0, 0, 255),
                        'prey': QColor(255, 255, 0)}  # grid colors
         self.current_color = 'empty'  # 当前选中的颜色
 
@@ -401,7 +401,7 @@ class GridWidget(QWidget):
         self.update()
 
     def read_map(self):
-        result = {"inaccessible": [], "empty": [], "target species": [], "predator": [], "prey": []}
+        result = {"inaccessible": [], "empty": [], "target specie": [], "predator": [], "prey": []}
         for i in range(self.grid_size):
             for j in range(self.grid_size):
                 result[self.grid[i][j]].append((i, j))

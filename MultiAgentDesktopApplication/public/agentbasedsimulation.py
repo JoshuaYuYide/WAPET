@@ -226,18 +226,18 @@ class ClimateAgent(Agent):
         #     self.model.water_agents.rainfall()
 
 class SoilAgent(Agent, MathmaticsModel):
-    def __init__(self, unique_id, model, specie_list, inaccessible_num):
+    def __init__(self, unique_id, model, specie_list, inaccessible_list, grid_size):
         super().__init__(unique_id=unique_id, model=model)
         self.cell_neighbors_occupy = 3
         MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
 
-        self.map_width = 10
-        self.map_height = 10
+        self.map_width = grid_size
+        self.map_height = grid_size
+        self.inaccessible_list = inaccessible_list
         self.map = np.empty([self.map_width, self.map_height], dtype=object)
         self.specie_list = specie_list
         self.soil_type_all = ['inaccessible', 'empty']
         self.soil_type_all.extend(self.specie_list)
-        self.inaccessible_num = inaccessible_num
         self.specie_occupy_density = 0.2
         for i in range(self.map_width):
             for j in range(self.map_height):
@@ -249,18 +249,18 @@ class SoilAgent(Agent, MathmaticsModel):
                 for name in self.soil_type_all:
                     self.map[i, j][name] = []
         self.climate_history = []
+        self.specie_amount = {}
+        for specie in self.specie_list:
+            self.specie_amount[specie] = 0
 
     def land_init(self):
-        remain_inaccessible_position_number = self.inaccessible_num
-        while remain_inaccessible_position_number > 0:
-            x = random.randint(0, self.map_width-1)
-            y = random.randint(0, self.map_height-1)
-
+        for i in self.inaccessible_list:
+            x = i[0]
+            y = i[1]
             if self.map[x, y]['is_empty']:
                 self.map[x, y]['is_empty'] = False
                 self.map[x, y]['is_inaccessible'] = True
                 self.map[x, y]['main_specie'] = 'inaccessible'
-                remain_inaccessible_position_number -= 1
 
     def get_valid_soil(self):
         valid_soil = []
@@ -270,12 +270,19 @@ class SoilAgent(Agent, MathmaticsModel):
                     valid_soil.append((i, j))
         return valid_soil
 
+    def update_species_amount(self):
+        for i in range(self.map_width):
+            for j in range(self.map_height):
+                for specie in self.specie_list:
+                    self.specie_amount[specie] += len(self.map[i, j][specie])
+
     def specie_occupy(self, specie):
         for i in range(self.map_width):
             for j in range(self.map_height):
                 if self.map[i][j]['is_empty']:
-                    if self.specie_occupy_density < len(self.map[i][j][specie]):
+                    if self.specie_occupy_density < (len(self.map[i][j][specie])/self.specie_amount[specie]):
                         self.map[i][j]['main_specie'] = specie
+                        self.map[i][j]['is_empty'] = False
 
     # add the specie on the soil
     def add_specie_on_soil(self, specie, specie_agent, position):
@@ -315,16 +322,17 @@ class SoilAgent(Agent, MathmaticsModel):
             return self.logistic_growth_individual(N, K, increase_rate, specie_agent.fertility_change * (specie_agent.age - specie_agent.married_min_age))
 
     def step(self):
-        for specie in self.specie_list:
+        self.update_species_amount()
+        for specie in list(self.specie_list):
             self.specie_occupy(specie)
         self.change_soil_carry_ability()
 
 class EnvModel(Model):
-    def __init__(self, specie_dict, inaccessible_num):
+    def __init__(self, specie_dict, inaccessible_list, grid_size):
         self.specie_dict = specie_dict
         self.schedule = mesa.time.SimultaneousActivation(self)
         soil_unique_id = self.next_id
-        self.soil_agent = SoilAgent(soil_unique_id, self, list(self.specie_dict.keys()), inaccessible_num)
+        self.soil_agent = SoilAgent(soil_unique_id, self, list(self.specie_dict.keys()), inaccessible_list, grid_size)
         self.soil_agent.land_init()
         self.schedule.add(self.soil_agent)
         climate_unique_id = self.next_id
