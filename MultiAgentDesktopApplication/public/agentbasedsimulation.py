@@ -10,6 +10,7 @@ from collections import Counter
 class Animal(MathmaticsModel):
     def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10,
                  fertility_change = -0.001, alive_ability_change_per_time = 0.001, attack_ability = 0.5, escape_ability = 0.5):
+        self.classification = 'animal'
         self.cell_neighbors_occupy = 3
         MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
         self.age = random.randint(0, 10)
@@ -90,9 +91,9 @@ class Animal(MathmaticsModel):
             married_candidate = self.model.soil_agent.map[self.position[0], self.position[1]][self.specie]
             for partner_agent in married_candidate:
                 if self.can_married(partner_agent.gender) and partner_agent.can_married(self.gender):
-                    self.partner = partner_agent.unique_id
+                    self.partner = partner_agent
                     self.is_married = True
-                    partner_agent.partner = self.unique_id
+                    partner_agent.partner = self.partner
                     partner_agent.is_married = True
                     break
 
@@ -105,14 +106,14 @@ class Animal(MathmaticsModel):
                 new_agent_id = self.model.next_id
                 new_agent = TargetSpecieAgent(new_agent_id, self.model)
                 new_agent.position = self.position
-                new_agent.parents = [self.unique_id, self.partner]
+                new_agent.parents = [self, self.partner]
                 new_agent.parents_count = 2
                 new_agent.age = 0
                 new_agent.birthday = self.model.schedule.time
                 self.kids_count += 1
                 self.kids.append(new_agent_id)
                 # partner_agent = self.find_agent_by_id(self.partner_id)
-                partner_agent = self.model.specie_all_agents[self.specie][self.partner]
+                partner_agent = self.model.specie_all_agents[self.specie][self.partner.unique_id]
                 partner_agent.kids_count += 1
                 partner_agent.kids.append(new_agent_id)
                 self.model.soil_agent.add_specie_on_soil(self.specie, new_agent, self.position)
@@ -188,6 +189,7 @@ class ClimateAgent(Agent):
     # 季风气候、热带雨林气候、热带草原气候、热带沙漠气候、热带季风气候、热带雨林气候、热带草原气候、热带沙漠气候
     def __init__(self, unique_id, model, type):
         super().__init__(unique_id, model)
+        self.classification = 'climate'
         self.type = type
         self.climate_dict = {'sunshine': 0, 'wind': 0, 'rainfall': 0, 'cloudy': 0}
         self.climate = random.choice(list(self.climate_dict.keys()))
@@ -231,6 +233,7 @@ class SoilAgent(Agent, MathmaticsModel):
         self.cell_neighbors_occupy = 3
         MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
 
+        self.classification = 'soil'
         self.map_width = grid_size
         self.map_height = grid_size
         self.inaccessible_list = inaccessible_list
@@ -279,7 +282,7 @@ class SoilAgent(Agent, MathmaticsModel):
     def specie_occupy(self, specie):
         for i in range(self.map_width):
             for j in range(self.map_height):
-                if self.map[i][j]['is_empty']:
+                if self.map[i][j]['is_empty'] and self.map[i][j]['is_inaccessible'] == False:
                     if self.specie_occupy_density < (len(self.map[i][j][specie])/self.specie_amount[specie]):
                         self.map[i][j]['main_specie'] = specie
                         self.map[i][j]['is_empty'] = False

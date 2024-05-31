@@ -73,6 +73,7 @@ class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calc
 
         self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 'empty'))
         self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 'inaccessible'))
+        self.plot_map_target_specie.clicked.connect(self.plot_target_specie_on_map)
 
         def set_color(grid_widget, color_index):
             grid_widget.current_color = color_index

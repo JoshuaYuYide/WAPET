@@ -46,6 +46,8 @@ class PanelInit():
         self.leftmost = QTabWidget()
         self.leftmost.addTab(self.species_table_widget, "Species Data Table")
         self.leftmost.addTab(self.result_table_widget, "Simulation Result Table")
+
+        self.leftmost.setFixedWidth(300)
         return self.leftmost
 
     def left_element(self):
@@ -168,20 +170,31 @@ class PanelInit():
         self.mr_map_size = QLineEdit()
         self.mr_map_size.setClearButtonEnabled(True)
         self.mr_map_size.setText("10")
+        self.mr_map_size.setFixedWidth(60)
 
         self.mr_grid_widget = GridWidget(int(self.mr_map_size.text()))
 
         self.mr_inaccessible_number = QLineEdit()
         self.mr_inaccessible_number.setClearButtonEnabled(True)
         self.mr_inaccessible_number.setText("10")
+        self.mr_inaccessible_number.setFixedWidth(60)
 
         self.mr_generate_bt = QPushButton("Generate")
         self.mr_clear_bt = QPushButton("Clear")
         self.mr_random_bt = QPushButton("Random")
 
         # self.mr_button_layout = QHBoxLayout()
-        self.mr_button_draw_1 = QPushButton("empty land")
-        self.mr_button_draw_2 = QPushButton("inaccessible land")
+        self.mr_button_draw_1 = QPushButton("Add Empty Land")
+        self.mr_button_draw_2 = QPushButton("Add Inaccessible Land")
+        self.mr_button_confirm = QPushButton("Confirm")
+        self.mr_button_reset = QPushButton("Reset")
+
+        self.plot_map_target_specie = QPushButton("Plot Target Specie Distribution")
+        self.plot_map_carry_ability = QPushButton("Plot Carry Ability Distribution")
+        # self.plot_map_thresholds = QLineEdit()
+        # self.plot_map_thresholds.setClearButtonEnabled(True)
+        # self.plot_map_thresholds.setText("10")
+
 
     def left_panel(self):
         self.left_element()
@@ -293,6 +306,7 @@ class PanelInit():
         self.middle_right.addWidget(self.mr_grid_widget)
 
         self.middle_right_operation_layout1 = QHBoxLayout()
+        self.middle_right_operation_layout1.addWidget(QLabel("Map Setting:"))
         self.middle_right_operation_layout1.addWidget(QLabel("map size:"))
         self.middle_right_operation_layout1.addWidget(self.mr_map_size)
         self.middle_right_operation_layout1.addWidget(QLabel("inaccessible number:"))
@@ -304,9 +318,19 @@ class PanelInit():
 
 
         self.middle_right_button_layout = QHBoxLayout()
+        self.middle_right_button_layout.addWidget(QLabel("Edit Map:"))
         self.middle_right_button_layout.addWidget(self.mr_button_draw_1)
         self.middle_right_button_layout.addWidget(self.mr_button_draw_2)
+        self.middle_right_button_layout.addWidget(self.mr_button_confirm)
+        self.middle_right_button_layout.addWidget(self.mr_button_reset)
         self.middle_right.addLayout(self.middle_right_button_layout)
+
+        self.middle_right_plot_layout = QHBoxLayout()
+        self.middle_right_plot_layout.addWidget(QLabel("Plot on Map:"))
+        self.middle_right_plot_layout.addWidget(self.plot_map_target_specie)
+        self.middle_right_plot_layout.addWidget(self.plot_map_carry_ability)
+        self.middle_right.addLayout(self.middle_right_plot_layout)
+
 
         self.middle_right_panel = QWidget()
         self.middle_right_panel.setLayout(self.middle_right)
@@ -332,8 +356,8 @@ class PanelInit():
         self.linechart = QChartView()
         self.linechart.setRenderHint(QPainter.Antialiasing)
 
-        self.network = QChartView()
-        self.network.setRenderHint(QPainter.Antialiasing)
+        # self.network = QChartView()
+        # self.network.setRenderHint(QPainter.Antialiasing)
 
     def right_panel(self):
         self.right_element()
@@ -341,6 +365,7 @@ class PanelInit():
         self.right_plot = QTabWidget()
         self.right_plot.addTab(self.boxchart, "Box Chart")
         self.right_plot.addTab(self.linechart, "Line Chart")
+        # self.right_plot.addTab(self.network, "Network")
 
         self.right = QVBoxLayout()
         self.right.addWidget(self.right_title)
