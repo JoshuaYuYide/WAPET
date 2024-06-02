@@ -17,7 +17,7 @@ class Check:
             and self.growth_rate.text() and self.carrying_capacity.text() and self.natural_life_span.text() and
             self.move_speed_mean.text() and self.move_speed_std.text() and self.marriage_age.text() and
             self.attack_ability.text() and self.escape_ability.text() and self.alive_ability_change_per_time.text() and
-            self.fecundity_attenuation.text())
+            self.fecundity_attenuation.text() and self.mr_button_box.isChecked())
         if enabled:
             self.species_submit_bt.setEnabled(True)
         else:
@@ -29,21 +29,34 @@ class Check:
         )
 
     @Slot()
-    def check_species_table(self):
+    def check_table(self):
         if self.species_table.columnCount() > 0:
-            self.species_delete_bt.setEnabled(True)
-            self.plot.setEnabled(True)
+            # self.species_delete_bt.setEnabled(True)
             self.clear_table_bt.setEnabled(True)
-            self.simulate.setEnabled(True)
             self.clear_table_bt.setEnabled(True)
+            if self.result_table.rowCount() == 0:
+                self.simulate_bt.setEnabled(True)
+            else:
+                self.simulate_bt.setEnabled(False)
         else:
-            self.species_delete_bt.setEnabled(False)
-            self.plot.setEnabled(False)
+            # self.species_delete_bt.setEnabled(False)
             self.clear_table_bt.setEnabled(False)
-            self.simulate.setEnabled(False)
+            self.simulate_bt.setEnabled(False)
             self.clear_table_bt.setEnabled(False)
 
         if self.species_table.columnCount() == 1:
             self.species_submit_bt.setEnabled(False)
         if self.species_table.columnCount() == 0:
             self.species_submit_bt.setEnabled(True)
+
+        if self.result_table.rowCount() > 0:
+            self.plot_bt.setEnabled(True)
+        else:
+            self.plot_bt.setEnabled(False)
+
+    @Slot()
+    def check_plot(self):
+        if self.right_plot.count() > 0:
+            self.clear_plot_bt.setEnabled(True)
+        else:
+            self.clear_plot_bt.setEnabled(False)

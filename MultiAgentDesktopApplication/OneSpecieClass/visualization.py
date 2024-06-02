@@ -26,6 +26,9 @@ class Visulization:
     @Slot()
     def plot_data(self):
         # self.right_plot.addTab(self.plot_network(), "Network")
+        self.right_plot.addTab(self.boxchart, "Box Chart")
+        self.right_plot.addTab(self.linechart, "Line Chart")
+
         root = self.create_specie_tree('target_specie')
         tree_view = TreeGraphicsView(root)
         tree_widget = QWidget()
@@ -185,13 +188,89 @@ class Visulization:
 
     @Slot()
     def plot_target_specie_on_map(self):
-        for x in range(int(self.mr_map_size.text())):
-            for y in range(int(self.mr_map_size.text())):
-                if self.model.soil_agent.map[x][y]['main_specie'] == 'target_specie':
-                    self.mr_grid_widget.draw_species([x,y], 'target specie')
+        self.mr_grid_widget.reset_color()
+        specie_name = 'target_specie'
+        total_amount = self.model.soil_agent.specie_amount[specie_name]
+        for y in range(int(self.mr_map_size.text())):
+            for x in range(int(self.mr_map_size.text())):
+                if not self.model.soil_agent.map[x][y]['is_inaccessible']:
+                    # alpha = (len(self.model.soil_agent.map[x][y]['target_specie']) / total_amount) * 255
+                    alpha = (len(self.model.soil_agent.map[x][y][specie_name]) / total_amount)
+                    self.mr_grid_widget.update_alpha(specie_name, alpha, [x,y])
+
+        self.mr_grid_widget.draw_species(specie_name)
 
 
+    @Slot()
+    def plot_carry_on_map(self):
+        self.mr_grid_widget.reset_color()
+        specie_name = 'carry_ability'
+        max_carry = float('-inf')
+        for y in range(int(self.mr_map_size.text())):
+            for x in range(int(self.mr_map_size.text())):
+                if not self.model.soil_agent.map[x][y]['is_inaccessible']:
+                    if self.model.soil_agent.map[x][y][specie_name] > max_carry:
+                        max_carry = self.model.soil_agent.map[x][y][specie_name]
 
+        for y in range(int(self.mr_map_size.text())):
+            for x in range(int(self.mr_map_size.text())):
+                if not self.model.soil_agent.map[x][y]['is_inaccessible']:
+                    # alpha = (len(self.model.soil_agent.map[x][y]['target_specie']) / total_amount) * 255
+                    alpha = self.model.soil_agent.map[x][y][specie_name] / max_carry
+                    self.mr_grid_widget.update_alpha(specie_name, alpha, [x, y])
+
+        self.mr_grid_widget.draw_species(specie_name)
+
+class TreeNode:
+    def __init__(self, label):
+        self.label = label
+        self.children = []
+
+    def add_child(self, node):
+        self.children.append(node)
+
+class TreeGraphicsView(QGraphicsView):
+    def __init__(self, root, parent=None):
+        super().__init__(parent)
+        self.scene = QGraphicsScene(self)
+        self.setScene(self.scene)
+        self.root = root
+        self.node_radius = 2
+        self.vertical_spacing = 80
+        self.horizontal_spacing = self.node_radius * 2
+        self.draw_tree()
+
+    def draw_tree(self):
+        self._draw_subtree(self.root, 0, 0, 0)
+
+    def _draw_subtree(self, node, x, y, depth):
+        # Draw the node
+        ellipse = QGraphicsEllipseItem(x, y, self.node_radius * 2, self.node_radius * 2)
+        ellipse.setBrush(QBrush(Qt.blue))
+        ellipse.setPen(QPen(Qt.black))
+        self.scene.addItem(ellipse)
+
+        # # Draw the label
+        # text = QGraphicsTextItem(str(node.label))
+        # text.setPos(x + self.node_radius - text.boundingRect().width() / 2, y + self.node_radius - text.boundingRect().height() / 2)
+        # self.scene.addItem(text)
+
+        # Draw the children
+        child_x = x - (len(node.children) - 1) * self.horizontal_spacing / 2
+        child_y = y + self.vertical_spacing
+        pen = QPen(Qt.red)
+        pen.setWidth(2)
+        color = QColor(Qt.red)
+        color.setAlphaF(0.2)
+        pen.setColor(color)
+        for child in node.children:
+            child_pos = (child_x + self.node_radius, child_y + self.node_radius)
+            # Draw the line to the child
+            line = self.scene.addLine(x + self.node_radius, y + self.node_radius * 2, child_pos[0],
+                                      child_pos[1], pen)
+            # Recursively draw the child
+            self._draw_subtree(child, child_x, child_y, depth + 1)
+            child_x += self.horizontal_spacing
 
 # class NetworkxWidget(QWidget):
 #     def __init__(self, graph):
@@ -500,56 +579,6 @@ class Visulization:
 #             source = self._nodes_map[a]
 #             dest = self._nodes_map[b]
 #             self.scene().addItem(Edge(source, dest))
-
-class TreeNode:
-    def __init__(self, label):
-        self.label = label
-        self.children = []
-
-    def add_child(self, node):
-        self.children.append(node)
-
-class TreeGraphicsView(QGraphicsView):
-    def __init__(self, root, parent=None):
-        super().__init__(parent)
-        self.scene = QGraphicsScene(self)
-        self.setScene(self.scene)
-        self.root = root
-        self.node_radius = 2
-        self.vertical_spacing = 80
-        self.horizontal_spacing = self.node_radius * 2
-        self.draw_tree()
-
-    def draw_tree(self):
-        self._draw_subtree(self.root, 0, 0, 0)
-
-    def _draw_subtree(self, node, x, y, depth):
-        # Draw the node
-        ellipse = QGraphicsEllipseItem(x, y, self.node_radius * 2, self.node_radius * 2)
-        ellipse.setBrush(QBrush(Qt.blue))
-        ellipse.setPen(QPen(Qt.black))
-        self.scene.addItem(ellipse)
-
-        # # Draw the label
-        # text = QGraphicsTextItem(str(node.label))
-        # text.setPos(x + self.node_radius - text.boundingRect().width() / 2, y + self.node_radius - text.boundingRect().height() / 2)
-        # self.scene.addItem(text)
-
-        # Draw the children
-        child_x = x - (len(node.children) - 1) * self.horizontal_spacing / 2
-        child_y = y + self.vertical_spacing
-        pen = QPen(Qt.red)
-        pen.setWidth(2)
-        color = QColor(Qt.red)
-        color.setAlphaF(0.8)  # 设置颜色的透明度为 0.5
-        pen.setColor(color)
-        for child in node.children:
-            child_pos = (child_x + self.node_radius, child_y + self.node_radius)
-            # Draw the line to the child
-            line = self.scene.addLine(x + self.node_radius, y + self.node_radius * 2, child_pos[0], child_pos[1], pen)
-            # Recursively draw the child
-            self._draw_subtree(child, child_x, child_y, depth + 1)
-            child_x += self.horizontal_spacing
 
 
 # def create_sample_tree():

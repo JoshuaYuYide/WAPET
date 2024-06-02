@@ -16,6 +16,7 @@ class UpdatePanel:
                                                     "attack ability", "escape ability", "alive ability change rate",
                                                     "fecundity attenuation", "climate type", "carrying capacity",
                                                     "simulation months", "map"]
+        self.inaccessible_list = []
 
     @Slot()
     def submit_species_func(self):
@@ -120,6 +121,8 @@ class UpdatePanel:
 
     @Slot()
     def clear_map(self):
+        self.mr_map_size.clear()
+        self.mr_inaccessible_number.clear()
         self.mr_grid_widget.clear()
 
     @Slot()
@@ -131,3 +134,27 @@ class UpdatePanel:
         map_size = random.randint(1, 10)
         self.mr_map_size.setText(str(map_size))
         self.mr_inaccessible_number.setText(str(random.randint(1, map_size)))
+
+    @Slot()
+    def confirm_map(self):
+        if self.mr_button_box.isChecked():
+            self.mr_map_size.setEnabled(False)
+            self.mr_inaccessible_number.setEnabled(False)
+            self.mr_generate_bt.setEnabled(False)
+            self.mr_clear_bt.setEnabled(False)
+            self.mr_random_bt.setEnabled(False)
+            self.mr_button_draw_1.setEnabled(False)
+            self.mr_button_draw_2.setEnabled(False)
+        else:
+            self.mr_map_size.setEnabled(True)
+            self.mr_inaccessible_number.setEnabled(True)
+            self.mr_generate_bt.setEnabled(True)
+            self.mr_clear_bt.setEnabled(True)
+            self.mr_random_bt.setEnabled(True)
+            self.mr_button_draw_1.setEnabled(True)
+            self.mr_button_draw_2.setEnabled(True)
+
+    @Slot()
+    def clear_plot(self):
+        while self.right_plot.count() > 0:
+            self.right_plot.removeTab(0)

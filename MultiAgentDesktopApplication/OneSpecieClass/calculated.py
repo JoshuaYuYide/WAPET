@@ -61,12 +61,9 @@ class Calculate(MathmaticsModel):
                     result['prey'][self.specie_table_rowname[j]] = self.species_table.item(j,i).text()
 
         total_time = result['target specie']['simulation months']
-        specie_dict = {'target_specie': {'population': result['target specie']['initial population'],
-                                         'alive_ability_change_per_time': result['target specie']['alive ability change rate'],
-                                         'fertility_change_per_time': result['target specie']['alive ability change rate']}}
-        # inaccessible_num = int(self.mr_inaccessible_number.text())
+        self.specie_dict = {'target_specie': {'population': result['target specie']['initial population']}}
 
-        self.model = EnvModel(specie_dict, self.inaccessible_list, self.mr_grid_widget.grid_size)
+        self.model = EnvModel(self)
         for time in range(int(total_time)):
             self.model.step()
             self.result_table.insertRow(time)

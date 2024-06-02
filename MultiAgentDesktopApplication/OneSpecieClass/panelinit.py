@@ -124,8 +124,8 @@ class PanelInit():
         # specie operation
         self.species_submit_bt = QPushButton("Submit")
         self.species_clear_bt = QPushButton("Clear")
-        self.species_delete_bt = QPushButton("Delete")
-        self.species_delete_bt.setEnabled(False)
+        # self.species_delete_bt = QPushButton("Delete")
+        # self.species_delete_bt.setEnabled(False)
         self.species_random_bt = QPushButton("Random")
         self.species_random_seed = QLineEdit()
         self.species_random_seed.setClearButtonEnabled(True)
@@ -134,7 +134,10 @@ class PanelInit():
         # environment data management
         self.carrying_capacity = QLineEdit()
         self.carrying_capacity.setClearButtonEnabled(True)
-        self.carrying_capacity.setText("10000")
+        self.carrying_capacity.setText("10")
+        self.carrying_cap_std = QLineEdit()
+        self.carrying_cap_std.setClearButtonEnabled(True)
+        self.carrying_cap_std.setText("1")
         self.climate_type = QComboBox()
         self.climate_type.addItem("tropical rain forest climate")
         self.simulation_years = QLineEdit()
@@ -150,12 +153,14 @@ class PanelInit():
         self.extreme_env_inf_carrying_capacity.setChecked(False)
         self.extreme_env_inf_carrying_capacity.setDisabled(True)
 
-        self.simulate = QPushButton("Simulate")
-        self.simulate.setEnabled(False)
+        self.simulate_bt = QPushButton("Simulate")
+        self.simulate_bt.setEnabled(False)
         self.clear_table_bt = QPushButton("Clear Table")
         self.clear_table_bt.setEnabled(False)
         self.clear_plot_bt = QPushButton("Clear Plot")
-        self.plot = QPushButton("Plot")
+        self.clear_plot_bt.setEnabled(False)
+        self.plot_bt = QPushButton("Plot")
+        self.plot_bt.setEnabled(False)
         self.export_table = QPushButton("Export Table")
         self.export_plot = QPushButton("Export Plot")
 
@@ -186,15 +191,16 @@ class PanelInit():
         # self.mr_button_layout = QHBoxLayout()
         self.mr_button_draw_1 = QPushButton("Add Empty Land")
         self.mr_button_draw_2 = QPushButton("Add Inaccessible Land")
-        self.mr_button_confirm = QPushButton("Confirm")
-        self.mr_button_reset = QPushButton("Reset")
+        self.mr_button_box = QCheckBox()
+        self.mr_button_box.setText("Lock")
+        self.mr_button_box.setChecked(False)
+
 
         self.plot_map_target_specie = QPushButton("Plot Target Specie Distribution")
         self.plot_map_carry_ability = QPushButton("Plot Carry Ability Distribution")
         # self.plot_map_thresholds = QLineEdit()
         # self.plot_map_thresholds.setClearButtonEnabled(True)
         # self.plot_map_thresholds.setText("10")
-
 
     def left_panel(self):
         self.left_element()
@@ -239,7 +245,7 @@ class PanelInit():
         self.specie_operation = QHBoxLayout()
         self.specie_operation.addWidget(self.species_submit_bt)
         self.specie_operation.addWidget(self.species_clear_bt)
-        self.specie_operation.addWidget(self.species_delete_bt)
+        # self.specie_operation.addWidget(self.species_delete_bt)
         self.specie_operation.addWidget(self.species_random_bt)
         self.specie_operation.addWidget(QLabel("random seed:"))
         self.specie_operation.addWidget(self.species_random_seed)
@@ -249,11 +255,13 @@ class PanelInit():
 
         self.env_data.addWidget(QLabel("climate type:"), 0, 0)
         self.env_data.addWidget(self.climate_type, 0, 1)
-        self.env_data.addWidget(QLabel("init carrying capacity:"), 0, 2)
+        self.env_data.addWidget(QLabel("carrying capacity mean:"), 0, 2)
         self.env_data.addWidget(self.carrying_capacity, 0, 3)
 
         self.env_data.addWidget(QLabel("simulation months:"), 1, 0)
         self.env_data.addWidget(self.simulation_years, 1, 1)
+        self.env_data.addWidget(QLabel("carrying capacity std:"), 1, 2)
+        self.env_data.addWidget(self.carrying_cap_std, 1, 3)
 
         # extreme environment test layout
         self.env_extreme = QGridLayout()
@@ -274,8 +282,8 @@ class PanelInit():
         self.export_plot.setEnabled(False)
 
         self.operation_panel = QGridLayout()
-        self.operation_panel.addWidget(self.simulate, 1, 0)
-        self.operation_panel.addWidget(self.plot, 1, 1)
+        self.operation_panel.addWidget(self.simulate_bt, 1, 0)
+        self.operation_panel.addWidget(self.plot_bt, 1, 1)
         self.operation_panel.addWidget(self.clear_table_bt, 2, 0)
         self.operation_panel.addWidget(self.clear_plot_bt, 2, 1)
         self.operation_panel.addWidget(self.export_table, 3, 0)
@@ -321,8 +329,7 @@ class PanelInit():
         self.middle_right_button_layout.addWidget(QLabel("Edit Map:"))
         self.middle_right_button_layout.addWidget(self.mr_button_draw_1)
         self.middle_right_button_layout.addWidget(self.mr_button_draw_2)
-        self.middle_right_button_layout.addWidget(self.mr_button_confirm)
-        self.middle_right_button_layout.addWidget(self.mr_button_reset)
+        self.middle_right_button_layout.addWidget(self.mr_button_box)
         self.middle_right.addLayout(self.middle_right_button_layout)
 
         self.middle_right_plot_layout = QHBoxLayout()
@@ -363,8 +370,7 @@ class PanelInit():
         self.right_element()
 
         self.right_plot = QTabWidget()
-        self.right_plot.addTab(self.boxchart, "Box Chart")
-        self.right_plot.addTab(self.linechart, "Line Chart")
+
         # self.right_plot.addTab(self.network, "Network")
 
         self.right = QVBoxLayout()
@@ -381,9 +387,7 @@ class GridWidget(QWidget):
 
         self.grid_size = num_grid  # 格子的大小
         self.grid = [['empty' for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # 格子的状态
-        # self.colors = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0), QColor(0, 0, 255), QColor(255, 255, 0)]  # 格子的颜色
-        self.colors = {'empty': QColor(255, 255, 255), 'inaccessible':QColor(255, 0, 0), 'target specie': QColor(0, 255, 0), 'predator': QColor(0, 0, 255),
-                       'prey': QColor(255, 255, 0)}  # grid colors
+        self.reset_color()
         self.current_color = 'empty'  # 当前选中的颜色
 
     def mousePressEvent(self, event):
@@ -397,27 +401,27 @@ class GridWidget(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        cell_size = min(self.width(), self.height()) / self.grid_size
+        self.cell_size = min(self.width(), self.height()) / self.grid_size
 
         # 绘制格子边框
         border_pen = QPen(Qt.black, 1)
         painter.setPen(border_pen)
         for y in range(self.grid_size):
             for x in range(self.grid_size):
-                painter.drawRect(x * cell_size, y * cell_size, cell_size, cell_size)
+                painter.drawRect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
 
         # 绘制格子颜色
         for y in range(self.grid_size):
             for x in range(self.grid_size):
                 color = self.colors[self.grid[y][x]]
-                painter.fillRect(x * cell_size + 1, y * cell_size + 1, cell_size - 1, cell_size - 1, color)
+                painter.fillRect(x * self.cell_size + 1, y * self.cell_size + 1, self.cell_size - 1, self.cell_size - 1, color)
 
     def clear(self):
         self.grid = [['empty' for _ in range(self.grid_size)] for _ in range(self.grid_size)]
         self.update()
 
     def draw_inaccessible(self, inaccessible_pos):
-        self.grid[inaccessible_pos[0]][inaccessible_pos[1]] = 'inaccessible'
+        self.grid[inaccessible_pos[1]][inaccessible_pos[0]] = 'inaccessible'
         self.update()
 
     def resize_map(self, num_grid):
@@ -435,6 +439,54 @@ class GridWidget(QWidget):
     def get_map_name(self):
         return str(self.grid_size)
 
-    def draw_species(self, specie_pos, specie_type):
-        self.grid[specie_pos[0]][specie_pos[1]] = specie_type
-        self.update()
+    def calculate_color(self, origin_color, alpha):
+        # 白色和深绿色的 RGB 值
+        white = (255, 255, 255)  # 白色
+        # 计算当前颜色分量，确保 alpha 的范围在 0 到 1 之间
+        alpha = max(0, min(1, alpha))
+        green_r = int(white[0] + (origin_color.red() - white[0]) * alpha)
+        green_g = int(white[1] + (origin_color.green() - white[1]) * alpha)
+        green_b = int(white[2] + (origin_color.blue() - white[2]) * alpha)
+
+        # 创建新的颜色
+        new_color = QColor(green_r, green_g, green_b)
+
+        return new_color
+
+    def update_alpha(self, specie_name, alpha, position):
+        x = position[0]
+        y = position[1]
+
+        new_color = self.calculate_color(self.colors[specie_name], alpha)
+        self.colors[f'{specie_name}_{x}_{y}'] = new_color
+
+    def reset_color(self):
+        '''
+        inaccessable: red
+        target specie: green
+        predator: blue
+        prey: yellow
+        empty: white
+        carry_ability: cyan
+        '''
+        self.colors = {'empty': QColor(255, 255, 255), 'inaccessible':QColor(255, 0, 0), 'target_specie': QColor(0, 255, 0), 'predator': QColor(0, 0, 255),
+                       'prey': QColor(255, 255, 0), 'carry_ability': QColor(0, 255, 255)}  # grid colors
+
+    def draw_species(self, specie_name):
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                new_key = f'{specie_name}_{x}_{y}'
+                if new_key in list(self.colors.keys()):
+                    self.grid[y][x] = f'{specie_name}_{x}_{y}'
+                    self.update()
+
+        # painter = QPainter(self)
+        # color = self.colors[specie_type]
+        # color.setAlpha(alpha)
+        # x = specie_pos[0]
+        # y = specie_pos[1]
+        # painter.fillRect(x * self.cell_size + 1, y * self.cell_size + 1, self.cell_size - 1, self.cell_size - 1, color)
+        # self.update_alpha(specie_type, alpha)
+        # self.grid[specie_pos[0]][specie_pos[1]] = specie_type
+        # self.update()
+        # self.reset_color()

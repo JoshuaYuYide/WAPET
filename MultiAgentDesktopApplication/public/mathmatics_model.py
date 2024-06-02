@@ -59,7 +59,7 @@ class MathmaticsModel:
     def logistic_solution_discrete(self, N0, r, K, t):
         return K / (1 + ((K - N0) / N0) * np.exp(-r * t))
 
-    def logistic_growth_individual(self, N, K, r, change_rate):
+    def logistic_growth_individual(self, N, K, r, change_rate, is_eat = False):
         """
         个体层面的连续时间Logistic增长模型。
         :param N: the population size
@@ -67,15 +67,24 @@ class MathmaticsModel:
         :param r: the intrinsic growth rate
         :return: the change of the individual growth and eating
         """
-        # 第一次随机：环境调控，决定是否有机会繁殖
-        if random.random() < (1 - N / K):
-            # 第二次随机：繁殖成功率
-            if random.random() < (1 + change_rate) * r:
+        if K == 0:
+            return False
+        if is_eat:
+            # 环境调控
+            if random.random() < (1 - N / K):
                 return True
             else:
                 return False
         else:
-            return False
+            # 第一次随机：环境调控，决定是否有机会繁殖
+            if random.random() < (1 - N / K):
+                # 第二次随机：繁殖成功率
+                if random.random() < (1 + change_rate) * r:
+                    return True
+                else:
+                    return False
+            else:
+                return False
 
     def allee_effect_individual(self, r, K, A, N0, t):
         """
@@ -138,19 +147,19 @@ class MathmaticsModel:
         height_max = math.floor(start[1] + speed)
         if width_min > width - 1:
             width_min = width - 1
-        elif width_max < 0:
+        if width_max < 0:
             width_max = 0
         if width_max > width - 1:
             width_max = width - 1
-        elif width_min < 0:
+        if width_min < 0:
             width_min = 0
         if height_min > height - 1:
             height_min = height - 1
-        elif height_max < 0:
+        if height_max < 0:
             height_max = 0
         if height_max > height - 1:
             height_max = height - 1
-        elif height_min < 0:
+        if height_min < 0:
             height_min = 0
 
         for i in range(width_min, width_max):

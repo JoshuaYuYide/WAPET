@@ -8,11 +8,20 @@ import random
 from collections import Counter
 
 class Animal(MathmaticsModel):
-    def __init__(self, specie, move_speed_mean, move_speed_std, increase_rate, life_time = 100, marriage_age = 10,
-                 fertility_change = -0.001, alive_ability_change_per_time = 0.001, attack_ability = 0.5, escape_ability = 0.5):
+    def __init__(self, specie):
         self.classification = 'animal'
         self.cell_neighbors_occupy = 3
+        self.specie = specie
         MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
+
+        rownames = self.model.widget_obj.specie_table_rowname
+        params = {}
+        for column in range(self.model.widget_obj.species_table.columnCount()):
+            for row in range(self.model.widget_obj.species_table.rowCount()):
+                params[rownames[row]] = self.model.widget_obj.species_table.item(row, column).text()
+            if params['species'] == self.specie:
+                break
+
         self.age = random.randint(0, 10)
         self.gender = random.choice(['male', 'female'])
         self.kids = []
@@ -20,23 +29,22 @@ class Animal(MathmaticsModel):
         self.parents = []
         self.parents_count = 0
         self.partner = None
-        self.specie = specie
         self.position = [-1, -1]
         self.hunger = 100
-        self.move_speed_mean = move_speed_mean
-        self.move_speed_std = move_speed_std
+        self.move_speed_mean = float(params['speed mean'])
+        self.move_speed_std = float(params['speed std'])
         self.is_married = False
-        self.increase_rate = increase_rate
-        self.life_time = life_time
+        self.increase_rate = float(params['growth rate'])
+        self.life_time = float(params['maximum age'])
         self.is_alive = True
-        self.married_min_age = marriage_age
-        self.fertility_change = fertility_change
-        self.alive_ability_change_per_time = alive_ability_change_per_time
-        self.attack_ability = attack_ability
-        self.escape_ability = escape_ability
+        self.married_min_age = float(params['marriage age'])
+        self.fertility_change = float(params['fecundity attenuation'])
+        self.alive_ability_change_per_time = float(params['alive ability change rate'])
+        self.attack_ability = float(params['attack ability'])
+        self.escape_ability = float(params['escape ability'])
 
     def is_live(self):
-        if self.hunger <= 0 and self.age > self.life_time:
+        if self.hunger <= 0 or self.age > self.life_time:
             self.model.soil_agent.delete_specie_on_soil(self)
             self.is_alive = False
             return False
@@ -87,7 +95,7 @@ class Animal(MathmaticsModel):
             return False
 
     def get_married(self):
-        if not self.is_married and self.age > 10:
+        if not self.is_married and self.age > self.married_min_age:
             married_candidate = self.model.soil_agent.map[self.position[0], self.position[1]][self.specie]
             for partner_agent in married_candidate:
                 if self.can_married(partner_agent.gender) and partner_agent.can_married(self.gender):
@@ -116,23 +124,24 @@ class Animal(MathmaticsModel):
                 partner_agent = self.model.specie_all_agents[self.specie][self.partner.unique_id]
                 partner_agent.kids_count += 1
                 partner_agent.kids.append(new_agent_id)
-                self.model.soil_agent.add_specie_on_soil(self.specie, new_agent, self.position)
+                self.model.soil_agent.add_specie_on_soil(new_agent, self.position)
                 self.model.new_agents_dict[self.specie] += 1
-                self.model.schedule.add(new_agent)
 
     def move(self, map):
+        self.model.soil_agent.delete_specie_on_soil(self)
         self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
+        self.model.soil_agent.add_specie_on_soil(self, self.position)
         return self.position
 
     def growth(self):
         self.age += 1
-        self.hunger -= 2
+        self.hunger -= 10
 
 class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.specie_name = 'target_specie'
-        Animal.__init__(self, self.specie_name, 1, 1, 0.1, 100, 20, -0.001, 0.001)
+        Animal.__init__(self, self.specie_name)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
     def step(self):
@@ -146,8 +155,9 @@ class TargetSpecieAgent(Agent, Animal):
 
         self.get_married()
         self.give_birth()
-        self.is_live()
         self.growth()
+        self.is_live()
+
 
 # 捕猎者
 class PredatorAgent(Agent, Animal):
@@ -228,17 +238,17 @@ class ClimateAgent(Agent):
         #     self.model.water_agents.rainfall()
 
 class SoilAgent(Agent, MathmaticsModel):
-    def __init__(self, unique_id, model, specie_list, inaccessible_list, grid_size):
+    def __init__(self, unique_id, model):
         super().__init__(unique_id=unique_id, model=model)
         self.cell_neighbors_occupy = 3
         MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
 
         self.classification = 'soil'
-        self.map_width = grid_size
-        self.map_height = grid_size
-        self.inaccessible_list = inaccessible_list
+        self.map_width = self.model.widget_obj.mr_grid_widget.grid_size
+        self.map_height = self.model.widget_obj.mr_grid_widget.grid_size
+        self.inaccessible_list = self.model.widget_obj.inaccessible_list
         self.map = np.empty([self.map_width, self.map_height], dtype=object)
-        self.specie_list = specie_list
+        self.specie_list = list(self.model.specie_dict.keys())
         self.soil_type_all = ['inaccessible', 'empty']
         self.soil_type_all.extend(self.specie_list)
         self.specie_occupy_density = 0.2
@@ -248,7 +258,7 @@ class SoilAgent(Agent, MathmaticsModel):
                 self.map[i, j]['is_empty'] = True
                 self.map[i, j]['is_inaccessible'] = False
                 self.map[i, j]['main_specie'] = 'empty'
-                self.map[i, j]['carry_ability'] = random.randint(10, 100)
+                self.map[i, j]['carry_ability'] = random.normalvariate(float(self.model.widget_obj.carrying_capacity.text()), float(self.model.widget_obj.carrying_cap_std.text()))
                 for name in self.soil_type_all:
                     self.map[i, j][name] = []
         self.climate_history = []
@@ -273,7 +283,17 @@ class SoilAgent(Agent, MathmaticsModel):
                     valid_soil.append((i, j))
         return valid_soil
 
+    def get_invalid_soil(self):
+        invalid_soil = []
+        for i in range(self.map_width):
+            for j in range(self.map_height):
+                if self.map[i, j]['is_inaccessible']:
+                    invalid_soil.append((i, j))
+        return invalid_soil
+
     def update_species_amount(self):
+        for specie in self.specie_list:
+            self.specie_amount[specie] = 0
         for i in range(self.map_width):
             for j in range(self.map_height):
                 for specie in self.specie_list:
@@ -282,17 +302,19 @@ class SoilAgent(Agent, MathmaticsModel):
     def specie_occupy(self, specie):
         for i in range(self.map_width):
             for j in range(self.map_height):
-                if self.map[i][j]['is_empty'] and self.map[i][j]['is_inaccessible'] == False:
+                if self.map[i][j]['is_empty'] and not self.map[i][j]['is_inaccessible']:
                     if self.specie_occupy_density < (len(self.map[i][j][specie])/self.specie_amount[specie]):
                         self.map[i][j]['main_specie'] = specie
                         self.map[i][j]['is_empty'] = False
 
     # add the specie on the soil
-    def add_specie_on_soil(self, specie, specie_agent, position):
+    def add_specie_on_soil(self, specie_agent, position):
+        specie = specie_agent.specie
         if not self.map[position[0], position[1]]['is_inaccessible']:
             if len(self.map[position[0], position[1]][specie]) > 0 or self.map[position[0], position[1]]['is_empty']:
                 if specie_agent not in self.map[position[0], position[1]][specie]:
                     self.map[position[0], position[1]][specie].append(specie_agent)
+                    self.model.schedule.add(specie_agent)
 
     def delete_specie_on_soil(self, specie_agent):
         specie = specie_agent.specie_name
@@ -316,26 +338,115 @@ class SoilAgent(Agent, MathmaticsModel):
             for j in range(self.map_height):
                 self.map[i][j]['carry_ability'] = self.map[i][j]['carry_ability'] * var
 
-    def can_eat(self, specie_agent, position, increase_rate):
+    def can_eat(self, specie_agent, position, increase_rate, is_eat = True):
         N = sum(list(map(lambda x: len(self.map[position[0], position[1]][x]), self.specie_list)))
         K = self.map[position[0], position[1]]['carry_ability']
         if specie_agent.married_min_age > specie_agent.age:
-            return self.logistic_growth_individual(N, K, increase_rate, 1)
+            return self.logistic_growth_individual(N, K, increase_rate, 1, is_eat)
         else:
-            return self.logistic_growth_individual(N, K, increase_rate, specie_agent.fertility_change * (specie_agent.age - specie_agent.married_min_age))
+            return self.logistic_growth_individual(N, K, increase_rate, specie_agent.fertility_change * (specie_agent.age - specie_agent.married_min_age), is_eat)
 
     def step(self):
         self.update_species_amount()
-        for specie in list(self.specie_list):
-            self.specie_occupy(specie)
+        # for specie in list(self.specie_list):
+        #     self.specie_occupy(specie)
         self.change_soil_carry_ability()
 
+
+
 class EnvModel(Model):
-    def __init__(self, specie_dict, inaccessible_list, grid_size):
+    def __init__(self, widget_obj):
+        self.reset_next_id()
+        self.widget_obj = widget_obj
+        self.specie_dict = self.widget_obj.specie_dict
+        self.schedule = mesa.time.SimultaneousActivation(self)
+        soil_unique_id = self.get_next_id()
+        self.soil_agent = SoilAgent(soil_unique_id, self)
+
+        self.soil_agent.land_init()
+        self.schedule.add(self.soil_agent)
+        climate_unique_id = self.get_next_id()
+        self.climate_agent = ClimateAgent(climate_unique_id, self, 'tropical rain forest climate')
+        self.climate_agent.climate_style_init()
+        self.schedule.add(self.climate_agent)
+        self.new_agents_dict = {}
+        self.specie_all_agents = {}
+
+        for specie in self.specie_dict.keys():
+            self.new_agents_dict[specie] = 0
+
+        # self.water_agents = WaterAgent(self.next_id, self)
+
+        self.statistics = {}
+        for specie in self.specie_dict.keys():
+            self.specie_all_agents[specie] = {}
+            self.specie_dict[specie]['population'] = int(self.specie_dict[specie]['population'])
+            for i in range(self.specie_dict[specie]['population']):
+                new_target_id = self.get_next_id()
+                if specie == 'target_specie':
+                    target_specie_agent = TargetSpecieAgent(new_target_id, self)
+                    target_specie_agent.position = random.choice(self.soil_agent.get_valid_soil())
+                    self.soil_agent.add_specie_on_soil(target_specie_agent, target_specie_agent.position)
+                    self.specie_all_agents[specie][new_target_id] = target_specie_agent
+                    if 'target_specie' not in list(self.statistics.keys()):
+                        self.statistics['target_specie'] = TargetSpecieAgent
+                elif specie == 'predator':
+                    predator_agent = PredatorAgent(new_target_id, self)
+                    predator_agent.position = random.choice(self.soil_agent.get_valid_soil())
+                    self.soil_agent.add_specie_on_soil(predator_agent, predator_agent.position)
+                    self.specie_all_agents[specie][new_target_id] = predator_agent
+                    if 'predator' not in list(self.statistics.keys()):
+                        self.statistics['predator'] = PredatorAgent
+                elif specie == 'prey':
+                    prey_agent = PreyAgent(new_target_id, self)
+                    prey_agent.position = random.choice(self.soil_agent.get_valid_soil())
+                    self.soil_agent.add_specie_on_soil(prey_agent, prey_agent.position)
+                    self.specie_all_agents[specie][new_target_id] = prey_agent
+                    if 'prey' not in list(self.statistics.keys()):
+                        self.statistics['prey'] = PreyAgent
+        # self.datacollector = mesa.DataCollector(
+        #     model_reporters={
+        #         "population": lambda m: len(m.fish_agents),
+        #         "Fishers": lambda m: m.num_fishers,
+        #         "Bank Money": lambda m: m.bank_agent.money
+        #     }
+        # )
+
+
+    def get_next_id(self):
+        self.next_id += 1
+        return self.next_id
+
+    def reset_next_id(self):
+        self.next_id = 0
+
+    def step(self):
+        self.schedule.step()
+
+        # # 在下一个时间步骤中添加新代理
+        # for new_agent in self.target_specie_new_agents:
+        #     self.schedule.add(new_agent)
+
+        # for specie in self.specie_dict.keys():
+        #     self.specie_dict[specie]['population'] += len(self.specie)
+        #     self.new_agents_dict[specie] = 0
+        for specie in self.specie_dict.keys():
+            self.specie_dict[specie]['population'] = 0
+
+        for agent in self.schedule.agents:
+            if isinstance(agent, self.statistics[specie]):
+                self.specie_dict[specie]['population'] += 1
+
+
+        # self.datacollector.collect(self)
+
+'''
+class EnvModel(Model):
+    def __init__(self, specie_dict, inaccessible_list, grid_size, carry_ability_mean):
         self.specie_dict = specie_dict
         self.schedule = mesa.time.SimultaneousActivation(self)
         soil_unique_id = self.next_id
-        self.soil_agent = SoilAgent(soil_unique_id, self, list(self.specie_dict.keys()), inaccessible_list, grid_size)
+        self.soil_agent = SoilAgent(soil_unique_id, self, list(self.specie_dict.keys()), inaccessible_list, grid_size, carry_ability_mean, float(self.carrying_cap_std.text()))
         self.soil_agent.land_init()
         self.schedule.add(self.soil_agent)
         climate_unique_id = self.next_id
@@ -385,5 +496,8 @@ class EnvModel(Model):
             self.specie_dict[specie]['population'] += self.new_agents_dict[specie]
             self.new_agents_dict[specie] = 0
         # self.datacollector.collect(self)
+'''
+
+
 
 
