@@ -121,6 +121,9 @@ class PanelInit():
         self.fecundity_attenuation = QLineEdit()
         self.fecundity_attenuation.setClearButtonEnabled(True)
         self.fecundity_attenuation.setText("-0.000001")
+        self.hunger_increment = QLineEdit()
+        self.hunger_increment.setClearButtonEnabled(True)
+        self.hunger_increment.setText("10")
 
         # specie operation
         self.species_submit_bt = QPushButton("Submit")
@@ -173,8 +176,6 @@ class PanelInit():
         self.mr_generate_bt = QPushButton("Generate")
         self.mr_clear_bt = QPushButton("Clear")
         self.mr_random_bt = QPushButton("Random")
-
-        # self.mr_button_layout = QHBoxLayout()
         self.mr_button_draw_1 = QPushButton("Add Empty Land")
         self.mr_button_draw_2 = QPushButton("Add Inaccessible Land")
         self.mr_button_box = QCheckBox()
@@ -227,6 +228,8 @@ class PanelInit():
         self.specie_survive_layout.addWidget(self.attack_ability, 2, 1)
         self.specie_survive_layout.addWidget(QLabel("escape ability:"), 2, 2)
         self.specie_survive_layout.addWidget(self.escape_ability, 2, 3)
+        self.specie_survive_layout.addWidget(QLabel("hunger increment:"), 3, 0)
+        self.specie_survive_layout.addWidget(self.hunger_increment, 3, 1)
 
 
         self.specie_population_setting_group = QGroupBox("Population Settings")
@@ -248,7 +251,6 @@ class PanelInit():
 
         # environment layout
         self.env_data = QGridLayout()
-
         self.env_data.addWidget(QLabel("climate type:"), 0, 0)
         self.env_data.addWidget(self.climate_type, 0, 1)
         self.env_data.addWidget(QLabel("simulation steps:"), 0, 2)

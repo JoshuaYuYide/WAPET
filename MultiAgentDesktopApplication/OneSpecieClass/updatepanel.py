@@ -15,6 +15,7 @@ class UpdatePanel:
                                                     "maximum age", "speed mean", "speed std", "marriage age",
                                                     "attack ability", "escape ability", "alive ability change rate",
                                                     "fecundity attenuation", "climate type", "carrying capacity",
+                                                    "hunger increment",
                                                     "simulation months", "map"]
         self.inaccessible_list = []
 
@@ -49,7 +50,7 @@ class UpdatePanel:
         self.result_items = 0
 
     def reset_species_table(self):
-        self.species_table.setRowCount(18)
+        self.species_table.setRowCount(len(self.specie_table_rowname))
         self.species_table.setColumnCount(0)
         self.species_table.setVerticalHeaderLabels(self.specie_table_rowname)
         self.species_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
