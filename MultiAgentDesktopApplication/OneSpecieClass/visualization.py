@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu,
                                QGraphicsScene, QGraphicsEllipseItem, QGraphicsTextItem, QGraphicsItem, QGraphicsObject,
                                QStyleOptionGraphicsItem, QGraphicsView)
-from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
+from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries, QBarSeries, QBarSet
 import random
 import networkx as nx
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -18,6 +18,7 @@ from PySide6.QtCore import (QEasingCurve, QLineF,
 from PySide6.QtGui import QBrush, QColor, QPainter, QPen, QPolygonF
 import matplotlib.pyplot as plt
 import math
+import numpy as np
 
 class Visulization:
     def __init__(self):
@@ -26,8 +27,10 @@ class Visulization:
     @Slot()
     def plot_data(self):
         # self.right_plot.addTab(self.plot_network(), "Network")
-        self.right_plot.addTab(self.boxchart, "Box Chart")
-        self.right_plot.addTab(self.linechart, "Line Chart")
+        self.right_plot.addTab(self.piechart_gender, "Gender Pie Chart")
+        self.right_plot.addTab(self.histchart_age, "Age Pie Chart")
+        self.right_plot.addTab(self.piechart_life_status, "Life Status Pie Chart")
+        self.right_plot.addTab(self.linechart, "Population Line Chart")
 
         root = self.create_specie_tree('target_specie')
         tree_view = TreeGraphicsView(root)
@@ -37,43 +40,50 @@ class Visulization:
         tree_widget.setLayout(layout)
 
         self.right_plot.addTab(tree_widget, "Tree")
-        self.plot_boxplot()
         self.plot_agent_based_logistic_individual()
+        self.plot_gender_piechart()
+        self.plot_age_piechart()
+        self.plot_life_status_piechart()
 
-        self.slider_year.setVisible(True)
-        self.slider_left.setVisible(True)
-        self.slider_right.setVisible(True)
-        self.slider_year.setRange(0, self.result_table.rowCount())
-        self.slider_right.setText(str(self.slider_year.maximum()) + '/month')
-        self.slider_left.setText(str(self.slider_year.minimum()) + '/month')
+        '''
+        # self.slider_year.setVisible(True)
+        # self.slider_left.setVisible(True)
+        # self.slider_right.setVisible(True)
+        # self.slider_year.setRange(0, self.result_table.rowCount())
+        # self.slider_right.setText(str(self.slider_year.maximum()) + '/month')
+        # self.slider_left.setText(str(self.slider_year.minimum()) + '/month')
+        '''
 
-    # def plot_network(self):
+    '''
+        # def plot_network(self):
     #     G = nx.Graph()
     #     G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1)])
     #     widget = NetworkxWidget(G)
     #     return widget
 
-    def plot_boxplot(self):
-        # Box Plot
-        chart = QChart()
-        series = QBoxPlotSeries()
-        series.setName("Box Plot")
+    # def plot_boxplot(self):
+    #     # Box Plot
+    #     chart = QChart()
+    #     series = QBoxPlotSeries()
+    #     series.setName("Box Plot")
+    # 
+    #     data = [
+    #         [1, 2, 3, 4, 5],  # 数据集1
+    #         [3, 4, 5, 6, 7],  # 数据集2
+    #         [2, 3, 4, 5, 6],  # 数据集3
+    #     ]
+    # 
+    #     for i, dataset in enumerate(data):
+    #         set_data = QBoxSet()
+    #         set_data.setValue(i, sum(dataset) / len(dataset))  # 使用平均值作为 y 坐标
+    #         series.append(set_data)
+    # 
+    #     chart.addSeries(series)
+    #     chart.createDefaultAxes()
+    # 
+    #     self.boxchart.setChart(chart)
+    '''
 
-        data = [
-            [1, 2, 3, 4, 5],  # 数据集1
-            [3, 4, 5, 6, 7],  # 数据集2
-            [2, 3, 4, 5, 6],  # 数据集3
-        ]
-
-        for i, dataset in enumerate(data):
-            set_data = QBoxSet()
-            set_data.setValue(i, sum(dataset) / len(dataset))  # 使用平均值作为 y 坐标
-            series.append(set_data)
-
-        chart.addSeries(series)
-        chart.createDefaultAxes()
-
-        self.boxchart.setChart(chart)
 
     def plot_agent_based_logistic_individual(self):
         # Line Chart
@@ -110,6 +120,139 @@ class Visulization:
         series.setPen(pen)
 
         self.linechart.setChart(chart)
+
+    def plot_age_histogram(self):
+        # Histogram Chart
+
+        chart = QChart()
+        series = QBarSeries()
+
+        specie = 'target_specie'
+        age = {}
+        for agent in self.model.schedule.agents:
+            if isinstance(agent, self.model.statistics[specie]):
+                if agent.age not in list(age.keys()):
+                    age[agent.age] = 1
+                else:
+                    age[agent.age] += 1
+
+        for name in list(age.keys()):
+            set = QBarSet(str(name))
+            set << age[name]
+            series.append(set)
+
+        chart.addSeries(series)
+        chart.setTitle("Age Histogram")
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.createDefaultAxes()
+
+        # 设置图例的位置
+        chart.legend().setAlignment(Qt.AlignLeft)
+
+        self.histchart_age.setChart(chart)
+
+    def plot_age_piechart(self):
+        chart = QChart()
+        series = QPieSeries()
+        series.setName("Age Pie Chart")
+
+        specie = 'target_specie'
+        age = {}
+        for agent in self.model.schedule.agents:
+            if isinstance(agent, self.model.statistics[specie]) and agent.is_alive:
+                if agent.age not in list(age.keys()):
+                    age[str(agent.age)] = 1
+                else:
+                    age[str(agent.age)] += 1
+
+        if len(age.keys()) == 0:
+            return
+
+        age_unique = list(age.keys())
+        age_unique = list(map(lambda x: int(x), age_unique))
+        age_unique.sort()
+        Q1 = np.percentile(age_unique, 25)
+        Q2 = np.percentile(age_unique, 50)
+        Q3 = np.percentile(age_unique, 75)
+
+        age_percentile = {}
+        age_percentile['%s>' % str(Q1)] = 0
+        age_percentile['%s-%s' % (str(Q1), str(Q2))] = 0
+        age_percentile['%s-%s' % (str(Q2), str(Q3))] = 0
+        age_percentile['>%s' % str(Q3)] = 0
+        for sub_age in age_unique:
+            if sub_age < Q1:
+                age_percentile['%s>' % str(Q1)] += age[str(sub_age)]
+            elif sub_age < Q2 and sub_age >= Q1:
+                age_percentile['%s-%s' % (str(Q1), str(Q2))] += age[str(sub_age)]
+            elif sub_age < Q3 and sub_age >= Q2:
+                age_percentile['%s-%s' % (str(Q2), str(Q3))] += age[str(sub_age)]
+            else:
+                age_percentile['>%s' % str(Q3)] += age[str(sub_age)]
+
+
+        for name in list(age_percentile.keys()):
+            series.append(name, age_percentile[name])
+
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+
+        # 设置图例的位置
+        chart.legend().setAlignment(Qt.AlignLeft)
+        self.histchart_age.setChart(chart)
+
+    def plot_gender_piechart(self):
+        # Pie Chart
+        chart = QChart()
+        series = QPieSeries()
+        series.setName("Age Pie Chart")
+
+        specie = 'target_specie'
+        gender = {}
+        gender['male'] = 0
+        gender['female'] = 0
+        for agent in self.model.schedule.agents:
+            if isinstance(agent, self.model.statistics[specie]):
+                if agent.gender == 'male':
+                    gender['male'] += 1
+                else:
+                    gender['female'] += 1
+
+        for name in list(gender.keys()):
+            series.append(name, gender[name])
+
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+
+        # 设置图例的位置
+        chart.legend().setAlignment(Qt.AlignLeft)
+        self.piechart_gender.setChart(chart)
+
+    def plot_life_status_piechart(self):
+        chart = QChart()
+        series = QPieSeries()
+        series.setName("Life Status Pie Chart")
+
+        specie = 'target_specie'
+        life_status = {}
+        life_status['alive'] = 0
+        life_status['dead'] = 0
+
+        for agent in self.model.schedule.agents:
+            if isinstance(agent, self.model.statistics[specie]):
+                if agent.is_alive:
+                    life_status['alive'] += 1
+                else:
+                    life_status['dead'] += 1
+
+        for name in list(life_status.keys()):
+            series.append(name, life_status[name])
+
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        chart.legend().setAlignment(Qt.AlignLeft)
+        self.piechart_life_status.setChart(chart)
+
 
     @Slot()
     def update_piechart(self):
@@ -199,7 +342,6 @@ class Visulization:
                     self.mr_grid_widget.update_alpha(specie_name, alpha, [x,y])
 
         self.mr_grid_widget.draw_species(specie_name)
-
 
     @Slot()
     def plot_carry_on_map(self):

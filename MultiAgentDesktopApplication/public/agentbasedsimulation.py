@@ -45,7 +45,7 @@ class Animal(MathmaticsModel):
 
     def is_live(self):
         if self.hunger <= 0 or self.age > self.life_time:
-            self.model.soil_agent.delete_specie_on_soil(self)
+            self.model.soil_agent.delete_specie_on_soil(self, remove_schedule = False)
             self.is_alive = False
             return False
         else:
@@ -145,18 +145,19 @@ class TargetSpecieAgent(Agent, Animal):
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
     def step(self):
-        self.move(self.model.soil_agent.map)
-        # self.attack('prey')
-        if self.model.soil_agent.can_eat(self, self.position, self.increase_rate):
-            if 100 - self.hunger < self.eat_volume:
-                self.hunger = 100
-            else:
-                self.hunger += self.eat_volume
+        if self.is_alive:
+            self.move(self.model.soil_agent.map)
+            # self.attack('prey')
+            if self.model.soil_agent.can_eat(self, self.position, self.increase_rate):
+                if 100 - self.hunger < self.eat_volume:
+                    self.hunger = 100
+                else:
+                    self.hunger += self.eat_volume
 
-        self.get_married()
-        self.give_birth()
-        self.growth()
-        self.is_live()
+            self.get_married()
+            self.give_birth()
+            self.growth()
+            self.is_live()
 
 
 # 捕猎者
@@ -316,12 +317,13 @@ class SoilAgent(Agent, MathmaticsModel):
                     self.map[position[0], position[1]][specie].append(specie_agent)
                     self.model.schedule.add(specie_agent)
 
-    def delete_specie_on_soil(self, specie_agent):
+    def delete_specie_on_soil(self, specie_agent, remove_schedule = True):
         specie = specie_agent.specie_name
         position = specie_agent.position
         if len(self.map[position[0], position[1]][specie]) > 0 and specie_agent in self.map[position[0], position[1]][specie]:
             self.map[position[0], position[1]][specie].remove(specie_agent)
-            self.model.schedule.remove(specie_agent)
+            if remove_schedule:
+                self.model.schedule.remove(specie_agent)
         else:
             print('cannot delete %s on %s' % (specie, str(position)))
 

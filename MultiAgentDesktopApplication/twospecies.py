@@ -41,7 +41,7 @@ class TwoSpecies(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Cal
 
         self.clear_table_bt.clicked.connect(self.clear_table_func)
         self.plot_bt.clicked.connect(self.plot_data)
-        self.slider_year.valueChanged.connect(self.update_piechart)
+        # self.slider_year.valueChanged.connect(self.update_piechart)
 
         self.species_submit_bt.clicked.connect(self.check_table)
         # self.species_delete_bt.clicked.connect(self.check_table)

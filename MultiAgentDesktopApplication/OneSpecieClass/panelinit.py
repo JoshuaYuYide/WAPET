@@ -4,7 +4,8 @@ from PySide6.QtGui import QPainter, QGradient, QPen, QColor
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QHBoxLayout, QLineEdit, QMainWindow,
                                QPushButton, QTableWidget, QTableWidgetItem,
-                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu, QCheckBox, QTabWidget)
+                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu,
+                               QCheckBox, QTabWidget, QGroupBox)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 
 class PanelInit():
@@ -63,11 +64,11 @@ class PanelInit():
         font.setBold(True)
         self.left_environment_title.setFont(font)
 
-        self.extreme_title = QLabel("Extreme Environments")
-        self.extreme_title.setAlignment(Qt.AlignCenter)
-        font = self.extreme_title.font()
-        font.setBold(True)
-        self.extreme_title.setFont(font)
+        # self.extreme_title = QLabel("Extreme Environments")
+        # self.extreme_title.setAlignment(Qt.AlignCenter)
+        # font = self.extreme_title.font()
+        # font.setBold(True)
+        # self.extreme_title.setFont(font)
 
         self.operation_title = QLabel("Operation Panel")
         self.operation_title.setAlignment(Qt.AlignCenter)
@@ -98,7 +99,7 @@ class PanelInit():
         self.growth_rate.setText("0.1")
         self.natural_life_span = QLineEdit()
         self.natural_life_span.setClearButtonEnabled(True)
-        self.natural_life_span.setText("10000")
+        self.natural_life_span.setText("100")
         self.move_speed_mean = QLineEdit()
         self.move_speed_mean.setClearButtonEnabled(True)
         self.move_speed_mean.setText("2")
@@ -123,9 +124,8 @@ class PanelInit():
 
         # specie operation
         self.species_submit_bt = QPushButton("Submit")
+        self.species_submit_bt.setEnabled(False)
         self.species_clear_bt = QPushButton("Clear")
-        # self.species_delete_bt = QPushButton("Delete")
-        # self.species_delete_bt.setEnabled(False)
         self.species_random_bt = QPushButton("Random")
         self.species_random_seed = QLineEdit()
         self.species_random_seed.setClearButtonEnabled(True)
@@ -144,15 +144,6 @@ class PanelInit():
         self.simulation_years.setClearButtonEnabled(True)
         self.simulation_years.setText("100")
 
-        # extreme environment test
-        self.extreme_env_inf_ison = QCheckBox()
-        self.extreme_env_inf_ison.setText("Extreme Environment")
-        self.extreme_env_inf_ison.setChecked(False)
-        self.extreme_env_inf_carrying_capacity = QCheckBox()
-        self.extreme_env_inf_carrying_capacity.setText("Infinite Carrying Capacity")
-        self.extreme_env_inf_carrying_capacity.setChecked(False)
-        self.extreme_env_inf_carrying_capacity.setDisabled(True)
-
         self.simulate_bt = QPushButton("Simulate")
         self.simulate_bt.setEnabled(False)
         self.clear_table_bt = QPushButton("Clear Table")
@@ -163,11 +154,6 @@ class PanelInit():
         self.plot_bt.setEnabled(False)
         self.export_table = QPushButton("Export Table")
         self.export_plot = QPushButton("Export Plot")
-
-        self.slider_year = QSlider(Qt.Horizontal)
-        self.slider_year.setEnabled(False)
-        self.slider_left = QLabel("0")
-        self.slider_right = QLabel("0")
 
         # landscape map
         self.mr_operation_layout = QHBoxLayout()
@@ -206,46 +192,56 @@ class PanelInit():
         self.left_element()
 
         # specie data layout
-        self.specie = QGridLayout()
-        self.specie.addWidget(QLabel("species:"), 1, 0)
-        self.specie.addWidget(self.species, 1, 1)
-        self.specie.addWidget(QLabel("name:"), 1, 2)
-        self.specie.addWidget(self.name, 1, 3)
+        self.specie = QVBoxLayout()
 
-        self.specie.addWidget(QLabel("survival rate:"), 2, 0)
-        self.specie.addWidget(self.survival_rate, 2, 1)
-        self.specie.addWidget(QLabel("fecundity:"), 2, 2)
-        self.specie.addWidget(self.fecundity, 2, 3)
+        self.specie_basic_info_group = QGroupBox("User Information")
+        self.specie.addWidget(self.specie_basic_info_group)
+        self.specie_basic_info_layout = QGridLayout()
+        self.specie_basic_info_group.setLayout(self.specie_basic_info_layout)
+        self.specie_basic_info_layout.addWidget(QLabel("species:"), 0, 0)
+        self.specie_basic_info_layout.addWidget(self.species, 0, 1)
+        self.specie_basic_info_layout.addWidget(QLabel("name:"), 0, 2)
+        self.specie_basic_info_layout.addWidget(self.name, 0, 3)
+        self.specie_basic_info_layout.addWidget(QLabel("maximum age:"), 1, 0)
+        self.specie_basic_info_layout.addWidget(self.natural_life_span, 1, 1)
+        self.specie_basic_info_layout.addWidget(QLabel("marriage age:"), 1, 2)
+        self.specie_basic_info_layout.addWidget(self.marriage_age, 1, 3)
+        self.specie_basic_info_layout.addWidget(QLabel("speed mean:"), 2, 0)
+        self.specie_basic_info_layout.addWidget(self.move_speed_mean, 2, 1)
+        self.specie_basic_info_layout.addWidget(QLabel("speed std:"), 2, 2)
+        self.specie_basic_info_layout.addWidget(self.move_speed_std, 2, 3)
 
-        self.specie.addWidget(QLabel("growth rate:"), 3, 0)
-        self.specie.addWidget(self.growth_rate, 3, 1)
-        self.specie.addWidget(QLabel("init population:"), 3, 2)
-        self.specie.addWidget(self.initial_population, 3, 3)
+        self.specie_survive_group = QGroupBox("Survivability")
+        self.specie.addWidget(self.specie_survive_group)
+        self.specie_survive_layout = QGridLayout()
+        self.specie_survive_group.setLayout(self.specie_survive_layout)
+        self.specie_survive_layout.addWidget(QLabel("survival rate:"), 0, 0)
+        self.specie_survive_layout.addWidget(self.survival_rate, 0, 1)
+        self.specie_survive_layout.addWidget(QLabel("alive ability change rate:"), 0, 2)
+        self.specie_survive_layout.addWidget(self.alive_ability_change_per_time, 0, 3)
+        self.specie_survive_layout.addWidget(QLabel("fecundity:"), 1, 0)
+        self.specie_survive_layout.addWidget(self.fecundity, 1, 1)
+        self.specie_survive_layout.addWidget(QLabel("fecundity attenuation:"), 1, 2)
+        self.specie_survive_layout.addWidget(self.fecundity_attenuation, 1, 3)
+        self.specie_survive_layout.addWidget(QLabel("attack ability:"), 2, 0)
+        self.specie_survive_layout.addWidget(self.attack_ability, 2, 1)
+        self.specie_survive_layout.addWidget(QLabel("escape ability:"), 2, 2)
+        self.specie_survive_layout.addWidget(self.escape_ability, 2, 3)
 
-        self.specie.addWidget(QLabel("maximum age:"), 4, 0)
-        self.specie.addWidget(self.natural_life_span, 4, 1)
-        self.specie.addWidget(QLabel("fecundity attenuation:"), 4, 2)
-        self.specie.addWidget(self.fecundity_attenuation, 4, 3)
 
-        self.specie.addWidget(QLabel("speed mean:"), 5, 0)
-        self.specie.addWidget(self.move_speed_mean, 5, 1)
-        self.specie.addWidget(QLabel("speed std:"), 5, 2)
-        self.specie.addWidget(self.move_speed_std, 5, 3)
+        self.specie_population_setting_group = QGroupBox("Population Settings")
+        self.specie.addWidget(self.specie_population_setting_group)
+        self.specie_population_setting_layout = QGridLayout()
+        self.specie_population_setting_group.setLayout(self.specie_population_setting_layout)
+        self.specie_population_setting_layout.addWidget(QLabel("growth rate:"), 0, 0)
+        self.specie_population_setting_layout.addWidget(self.growth_rate, 0, 1)
+        self.specie_population_setting_layout.addWidget(QLabel("init population:"), 0, 2)
+        self.specie_population_setting_layout.addWidget(self.initial_population, 0, 3)
 
-        self.specie.addWidget(QLabel("marriage age:"), 6, 0)
-        self.specie.addWidget(self.marriage_age, 6, 1)
-        self.specie.addWidget(QLabel("attack ability:"), 6, 2)
-        self.specie.addWidget(self.attack_ability, 6, 3)
-
-        self.specie.addWidget(QLabel("escape ability:"), 7, 0)
-        self.specie.addWidget(self.escape_ability, 7, 1)
-        self.specie.addWidget(QLabel("alive ability change rate:"), 7, 2)
-        self.specie.addWidget(self.alive_ability_change_per_time, 7, 3)
 
         self.specie_operation = QHBoxLayout()
         self.specie_operation.addWidget(self.species_submit_bt)
         self.specie_operation.addWidget(self.species_clear_bt)
-        # self.specie_operation.addWidget(self.species_delete_bt)
         self.specie_operation.addWidget(self.species_random_bt)
         self.specie_operation.addWidget(QLabel("random seed:"))
         self.specie_operation.addWidget(self.species_random_seed)
@@ -255,18 +251,17 @@ class PanelInit():
 
         self.env_data.addWidget(QLabel("climate type:"), 0, 0)
         self.env_data.addWidget(self.climate_type, 0, 1)
-        self.env_data.addWidget(QLabel("carrying capacity mean:"), 0, 2)
-        self.env_data.addWidget(self.carrying_capacity, 0, 3)
-
-        self.env_data.addWidget(QLabel("simulation months:"), 1, 0)
-        self.env_data.addWidget(self.simulation_years, 1, 1)
+        self.env_data.addWidget(QLabel("simulation steps:"), 0, 2)
+        self.env_data.addWidget(self.simulation_years, 0, 3)
+        self.env_data.addWidget(QLabel("carrying capacity mean:"), 1, 0)
+        self.env_data.addWidget(self.carrying_capacity, 1, 1)
         self.env_data.addWidget(QLabel("carrying capacity std:"), 1, 2)
         self.env_data.addWidget(self.carrying_cap_std, 1, 3)
 
         # extreme environment test layout
-        self.env_extreme = QGridLayout()
-        self.env_extreme.addWidget(self.extreme_env_inf_ison, 0, 0)
-        self.env_extreme.addWidget(self.extreme_env_inf_carrying_capacity, 0, 1)
+        # self.env_extreme = QGridLayout()
+        # self.env_extreme.addWidget(self.extreme_env_inf_ison, 0, 0)
+        # self.env_extreme.addWidget(self.extreme_env_inf_carrying_capacity, 0, 1)
 
         # self.env_operation = QHBoxLayout()
         # self.env_operation.addWidget(self.env_submit)
@@ -289,26 +284,14 @@ class PanelInit():
         self.operation_panel.addWidget(self.export_table, 3, 0)
         self.operation_panel.addWidget(self.export_plot, 3, 1)
 
-        self.slider_panel = QHBoxLayout()
-        # self.slider.setRange(0, 1000)
-        self.slider_panel.addWidget(self.slider_left)
-        self.slider_panel.addWidget(self.slider_year)
-        self.slider_panel.addWidget(self.slider_right)
-
         self.left = QVBoxLayout()
         self.left.addWidget(self.left_specie_title)
         self.left.addLayout(self.specie)
         self.left.addWidget(self.left_environment_title)
         self.left.addLayout(self.env_data)
-        # self.left.addLayout(self.env_operation)
         self.left.addLayout(self.specie_operation)
-        self.left.addWidget(self.extreme_title)
-        self.left.addLayout(self.env_extreme)
         self.left.addWidget(self.operation_title)
         self.left.addLayout(self.operation_panel)
-        self.left.addLayout(self.slider_panel)
-        # self.left.addWidget(self.left_specie_table_title)
-        # self.left.addWidget(self.table)
 
         self.middle_right = QVBoxLayout()
         self.middle_right.addWidget(self.mr_grid_widget)
@@ -323,7 +306,6 @@ class PanelInit():
         self.middle_right_operation_layout1.addWidget(self.mr_clear_bt)
         self.middle_right_operation_layout1.addWidget(self.mr_random_bt)
         self.middle_right.addLayout(self.middle_right_operation_layout1)
-
 
         self.middle_right_button_layout = QHBoxLayout()
         self.middle_right_button_layout.addWidget(QLabel("Edit Map:"))
@@ -357,8 +339,14 @@ class PanelInit():
         font.setBold(True)
         self.right_title.setFont(font)
 
-        self.boxchart = QChartView()
-        self.boxchart.setRenderHint(QPainter.Antialiasing)
+        self.piechart_gender = QChartView()
+        self.piechart_gender.setRenderHint(QPainter.Antialiasing)
+
+        self.histchart_age = QChartView()
+        self.histchart_age.setRenderHint(QPainter.Antialiasing)
+
+        self.piechart_life_status = QChartView()
+        self.piechart_life_status.setRenderHint(QPainter.Antialiasing)
 
         self.linechart = QChartView()
         self.linechart.setRenderHint(QPainter.Antialiasing)

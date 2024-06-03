@@ -29,22 +29,17 @@ class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calc
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.leftmost_panel())
         self.layout.addWidget(self.left_panel())
-        # self.layout.addLayout(self.middle_right_panel())
-        # self.layout.addLayout(self.middle_panel())
         self.layout.addLayout(self.right_panel())
 
         # Signals and Slots
         self.species_submit_bt.clicked.connect(self.submit_species_func)
         self.species_clear_bt.clicked.connect(self.clear_species_func)
-        # self.species_delete_bt.clicked.connect(self.delete_species_func)
         self.species_random_bt.clicked.connect(self.random_species_func)
 
         self.clear_table_bt.clicked.connect(self.clear_table_func)
         self.plot_bt.clicked.connect(self.plot_data)
-        self.slider_year.valueChanged.connect(self.update_piechart)
 
         self.species_submit_bt.clicked.connect(self.check_table)
-        # self.species_delete_bt.clicked.connect(self.check_table)
         self.species_table.cellChanged.connect(self.check_table)
         self.result_table.cellChanged.connect(self.check_table)
         self.clear_table_bt.clicked.connect(self.check_table)
