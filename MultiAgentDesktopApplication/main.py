@@ -23,8 +23,8 @@ if __name__ == "__main__":
     one_specie = OneSpecie()
     two_species = TwoSpecies()
 
-    tabWidget.addTab(one_specie.get_widget(), "One Specie")
-    tabWidget.addTab(two_species.get_widget(), "Two Species")
+    tabWidget.addTab(one_specie.get_widget(), "Single Specie")
+    tabWidget.addTab(two_species.get_widget(), "Multiple Species")
 
     tabWidget.resize(minimum_size)
     tabWidget.show()

@@ -124,6 +124,9 @@ class PanelInit():
         self.hunger_increment = QLineEdit()
         self.hunger_increment.setClearButtonEnabled(True)
         self.hunger_increment.setText("10")
+        self.monogamous = QCheckBox()
+        self.monogamous.setText("Monogamous")
+        self.monogamous.setChecked(True)
 
         # specie operation
         self.species_submit_bt = QPushButton("Submit")
@@ -240,6 +243,8 @@ class PanelInit():
         self.specie_population_setting_layout.addWidget(self.growth_rate, 0, 1)
         self.specie_population_setting_layout.addWidget(QLabel("init population:"), 0, 2)
         self.specie_population_setting_layout.addWidget(self.initial_population, 0, 3)
+        self.specie_population_setting_layout.addWidget(self.monogamous, 1, 0)
+
 
 
         self.specie_operation = QHBoxLayout()

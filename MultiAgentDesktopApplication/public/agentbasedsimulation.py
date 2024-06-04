@@ -10,9 +10,8 @@ from collections import Counter
 class Animal(MathmaticsModel):
     def __init__(self, specie):
         self.classification = 'animal'
-        self.cell_neighbors_occupy = 3
         self.specie = specie
-        MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
+        MathmaticsModel.__init__(self)
 
         rownames = self.model.widget_obj.specie_table_rowname
         params = {}
@@ -42,6 +41,12 @@ class Animal(MathmaticsModel):
         self.alive_ability_change_per_time = float(params['alive ability change rate'])
         self.attack_ability = float(params['attack ability'])
         self.escape_ability = float(params['escape ability'])
+        self.hunger_increment = float(params['hunger increment'])
+
+        self.monogamous = True
+        self.age_increment = 1
+        self.cell_neighbors_occupy = 3
+        self.is_cellular = True
 
     def is_live(self):
         if self.hunger <= 0 or self.age > self.life_time:
@@ -89,8 +94,14 @@ class Animal(MathmaticsModel):
         pass
 
     def can_married(self, partner_gender):
-        if self.age > self.married_min_age and not self.is_married and self.is_alive and self.gender != partner_gender:
-            return True
+        if self.age > self.married_min_age and self.is_alive and self.gender != partner_gender:
+            if self.monogamous:
+                if not self.is_married:
+                    return True
+                else:
+                    return False
+            else:
+                return True
         else:
             return False
 
@@ -129,13 +140,13 @@ class Animal(MathmaticsModel):
 
     def move(self, map):
         self.model.soil_agent.delete_specie_on_soil(self)
-        self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map)
+        self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map, self.cell_neighbors_occupy, self.is_cellular)
         self.model.soil_agent.add_specie_on_soil(self, self.position)
         return self.position
 
     def growth(self):
-        self.age += 1
-        self.hunger -= 10
+        self.age += self.age_increment
+        self.hunger -= self.hunger_increment
 
 class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model):
@@ -158,7 +169,6 @@ class TargetSpecieAgent(Agent, Animal):
             self.give_birth()
             self.growth()
             self.is_live()
-
 
 # 捕猎者
 class PredatorAgent(Agent, Animal):
@@ -241,9 +251,7 @@ class ClimateAgent(Agent):
 class SoilAgent(Agent, MathmaticsModel):
     def __init__(self, unique_id, model):
         super().__init__(unique_id=unique_id, model=model)
-        self.cell_neighbors_occupy = 3
-        MathmaticsModel.__init__(self, self.cell_neighbors_occupy)
-
+        MathmaticsModel.__init__(self)
         self.classification = 'soil'
         self.map_width = self.model.widget_obj.mr_grid_widget.grid_size
         self.map_height = self.model.widget_obj.mr_grid_widget.grid_size

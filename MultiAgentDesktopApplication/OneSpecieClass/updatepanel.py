@@ -38,8 +38,9 @@ class UpdatePanel:
         self.species_table.setItem(13, self.species_items, QTableWidgetItem(self.fecundity_attenuation.text()))
         self.species_table.setItem(14, self.species_items, QTableWidgetItem(self.climate_type.currentText()))
         self.species_table.setItem(15, self.species_items, QTableWidgetItem(self.carrying_capacity.text()))
-        self.species_table.setItem(16, self.species_items, QTableWidgetItem(self.simulation_years.text()))
-        self.species_table.setItem(17, self.species_items, QTableWidgetItem(self.mr_grid_widget.get_map_name()))
+        self.species_table.setItem(16, self.species_items, QTableWidgetItem(self.hunger_increment.text()))
+        self.species_table.setItem(17, self.species_items, QTableWidgetItem(self.simulation_years.text()))
+        self.species_table.setItem(18, self.species_items, QTableWidgetItem(self.mr_grid_widget.get_map_name()))
         self.species_items += 1
 
     def reset_result_table(self):
