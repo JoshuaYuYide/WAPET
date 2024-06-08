@@ -140,7 +140,7 @@ class Animal(MathmaticsModel):
 
     def move(self, map):
         self.model.soil_agent.delete_specie_on_soil(self)
-        self.position = self.random_walk(self.move_speed_mean, self.move_speed_std, self.position, map, self.cell_neighbors_occupy, self.is_cellular)
+        self.position = self.random_walk(self.specie, self.move_speed_mean, self.move_speed_std, self.position, map, self.cell_neighbors_occupy, self.is_cellular)
         self.model.soil_agent.add_specie_on_soil(self, self.position)
         return self.position
 

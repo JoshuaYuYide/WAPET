@@ -116,47 +116,39 @@ class MathmaticsModel:
                 return False
 
     # species cellular automata model
-    def cellular_automata(self, map, specie, candidate_position):
-        candidate_position_prob = []
-        for pos in range(len(candidate_position)):
-            i = candidate_position[pos][0]
-            j = candidate_position[pos][1]
-            specie_neighbors_count = 0
-            for x in range(i - 1, i + 2):
-                for y in range(j - 1, j + 2):
-                    if len(map[x][y][specie]) > 0:
-                        specie_neighbors_count += 1
-                        candidate_position_prob[pos] += len(map[x][y][specie])
-            if specie_neighbors_count < self.cell_neighbors_occupy:
-                candidate_position_prob[pos] = 0
+    def cellular_automata(self, map, specie, candidate_position, cell_num, is_cellular):
+        if is_cellular:
+            candidate_position_prob = [0] * len(candidate_position)
 
-        total_population = sum(candidate_position_prob)
-        specie_neighbors_count = list(map(lambda x: x / total_population, candidate_position_prob))
-        chosen_item = random.choices(candidate_position, candidate_position_prob, k=1)[0]
+            for pos in range(len(candidate_position)):
+                i = candidate_position[pos][0]
+                j = candidate_position[pos][1]
+                specie_neighbors_count = 0
+                for x in range(i - 1, i + 2):
+                    for y in range(j - 1, j + 2):
+                        if not map[x][y]['is_inaccessible'] and len(map[x][y][specie]) > 0:
+                            specie_neighbors_count += 1
+                            candidate_position_prob[pos] += len(map[x][y][specie])
+                if specie_neighbors_count < cell_num:
+                    candidate_position_prob[pos] = 0
+
+            total_population = sum(candidate_position_prob)
+            specie_neighbors_count = list(map(lambda x: x / total_population, candidate_position_prob))
+            chosen_item = random.choices(candidate_position, candidate_position_prob, k=1)[0]
+        else:
+            chosen_item = random.choices(candidate_position, k=1)[0]
         return chosen_item
 
-        # for i in range(len(map.map_width)):
-        #     for j in range(len(map.map_height)):
-        #         if map[i][j] == 'empty':
-        #             specie_neighbors_count = 0
-        #             for x in range(i - 1, i + 2):
-        #                 for y in range(j - 1, j + 2):
-        #                     if len(map[x][y][specie]):
-        #                         specie_neighbors_count += 1
-        #             if specie_neighbors_count >= self.cell_neighbors_occupy:
-        #                 candidate_position.append((i, j))
-        # return candidate_position
-
     # random walk model for species
-    def random_walk(self, speed_mean, speed_std, start_point, map, cell_num, is_cellular):
+    def random_walk(self, specie, speed_mean, speed_std, start_point, map, cell_num, is_cellular):
         speed = self.speed_gaussian(speed_mean, speed_std)
-        position = self.position_transfer(speed, map, start_point, cell_num, is_cellular)
+        position = self.position_transfer(specie, speed, map, start_point, cell_num, is_cellular)
         return position
 
     def speed_gaussian(self, mean = 1, std = 1):
         return norm.rvs(loc=mean, scale=std, size=1)
 
-    def position_transfer(self, speed, map, start, cell_num, is_cellular):
+    def position_transfer(self, specie, speed, map, start, cell_num, is_cellular):
         candidate_position = []
         width, height = map.shape
         width_min = math.ceil(start[0] - speed)
@@ -187,4 +179,4 @@ class MathmaticsModel:
         if len(candidate_position) == 0:
             return start
         else:
-            return self.cellular_automata(map, start, candidate_position, cell_num, is_cellular)
+            return self.cellular_automata(map, specie, candidate_position, cell_num, is_cellular)
