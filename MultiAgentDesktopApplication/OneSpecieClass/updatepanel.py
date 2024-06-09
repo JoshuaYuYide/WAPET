@@ -17,40 +17,62 @@ class UpdatePanel:
         #                              "fecundity attenuation", "climate type", "carrying capacity",
         #                              "hunger increment",
         #                              "simulation step", "map"]
-        self.specie_table_rowname =[self.species.objectName(), self.name.objectName(), self.survival_rate.objectName(),
-                                    self.fecundity.objectName(), self.initial_population.objectName(),
-                                    self.growth_rate.objectName(), self.natural_life_span.objectName(),
-                                    self.move_speed_mean.objectName(), self.move_speed_std.objectName(),
-                                    self.marriage_age.objectName(), self.attack_ability.objectName(),
-                                    self.escape_ability.objectName(), self.alive_ability_change_per_time.objectName(),
-                                    self.fecundity_attenuation.objectName(), self.climate_type.objectName(),
-                                    self.carrying_capacity.objectName(), self.hunger_increment.objectName(),
-                                    self.simulation_years.objectName(), self.mr_grid_widget.objectName()]
+        self.specie_table_obj =[self.species, self.name, self.survival_rate,
+                                    self.fecundity, self.initial_population,
+                                    self.growth_rate, self.natural_life_span,
+                                    self.move_speed_mean, self.move_speed_std,
+                                    self.marriage_age, self.attack_ability,
+                                    self.escape_ability, self.alive_ability_change_per_time,
+                                    self.fecundity_attenuation, self.climate_type,
+                                    self.carrying_capacity, self.carrying_cap_std,
+                                    self.hunger_increment, self.age_increment,
+                                    self.monogamous, self.is_cellular,
+                                    self.cell_neighbors_occupy, self.simulation_years,
+                                    self.mr_grid_widget]
+        self.specie_table_rowname = list(map(lambda x: x.objectName(), self.specie_table_obj))
+
+        self.specie_table_length = len(self.specie_table_rowname)
         self.inaccessible_list = []
 
     @Slot()
     def submit_species_func(self):
         self.species_table.insertColumn(self.species_items)
-        self.species_table.setItem(0, self.species_items, QTableWidgetItem(self.species.currentText()))
-        self.species_table.setItem(1, self.species_items, QTableWidgetItem(self.name.text()))
-        self.species_table.setItem(2, self.species_items, QTableWidgetItem(self.survival_rate.text()))
-        self.species_table.setItem(3, self.species_items, QTableWidgetItem(self.fecundity.text()))
-        self.species_table.setItem(4, self.species_items, QTableWidgetItem(self.initial_population.text()))
-        self.species_table.setItem(5, self.species_items, QTableWidgetItem(self.growth_rate.text()))
-        self.species_table.setItem(6, self.species_items, QTableWidgetItem(self.natural_life_span.text()))
-        self.species_table.setItem(7, self.species_items, QTableWidgetItem(self.move_speed_mean.text()))
-        self.species_table.setItem(8, self.species_items, QTableWidgetItem(self.move_speed_std.text()))
-        self.species_table.setItem(9, self.species_items, QTableWidgetItem(self.marriage_age.text()))
-        self.species_table.setItem(10, self.species_items, QTableWidgetItem(self.attack_ability.text()))
-        self.species_table.setItem(11, self.species_items, QTableWidgetItem(self.escape_ability.text()))
-        self.species_table.setItem(12, self.species_items, QTableWidgetItem(self.alive_ability_change_per_time.text()))
-        self.species_table.setItem(13, self.species_items, QTableWidgetItem(self.fecundity_attenuation.text()))
-        self.species_table.setItem(14, self.species_items, QTableWidgetItem(self.climate_type.currentText()))
-        self.species_table.setItem(15, self.species_items, QTableWidgetItem(self.carrying_capacity.text()))
-        self.species_table.setItem(16, self.species_items, QTableWidgetItem(self.hunger_increment.text()))
-        self.species_table.setItem(17, self.species_items, QTableWidgetItem(self.simulation_years.text()))
-        self.species_table.setItem(18, self.species_items, QTableWidgetItem(self.mr_grid_widget.get_map_name()))
+        for i in range(len(self.specie_table_obj)):
+            widget_obj = self.specie_table_obj[i]
+            if isinstance(widget_obj, QLineEdit):
+                row_name = widget_obj.text()
+            elif isinstance(widget_obj, QComboBox):
+                row_name = widget_obj.currentText()
+            elif isinstance(widget_obj, QCheckBox):
+                row_name = str(widget_obj.isChecked())
+            self.species_table.setItem(i, self.species_items, QTableWidgetItem(row_name))
         self.species_items += 1
+
+        # self.species_table.setItem(0, self.species_items, QTableWidgetItem(self.species.currentText()))
+        # self.species_table.setItem(1, self.species_items, QTableWidgetItem(self.name.text()))
+        # self.species_table.setItem(2, self.species_items, QTableWidgetItem(self.survival_rate.text()))
+        # self.species_table.setItem(3, self.species_items, QTableWidgetItem(self.fecundity.text()))
+        # self.species_table.setItem(4, self.species_items, QTableWidgetItem(self.initial_population.text()))
+        # self.species_table.setItem(5, self.species_items, QTableWidgetItem(self.growth_rate.text()))
+        # self.species_table.setItem(6, self.species_items, QTableWidgetItem(self.natural_life_span.text()))
+        # self.species_table.setItem(7, self.species_items, QTableWidgetItem(self.move_speed_mean.text()))
+        # self.species_table.setItem(8, self.species_items, QTableWidgetItem(self.move_speed_std.text()))
+        # self.species_table.setItem(9, self.species_items, QTableWidgetItem(self.marriage_age.text()))
+        # self.species_table.setItem(10, self.species_items, QTableWidgetItem(self.attack_ability.text()))
+        # self.species_table.setItem(11, self.species_items, QTableWidgetItem(self.escape_ability.text()))
+        # self.species_table.setItem(12, self.species_items, QTableWidgetItem(self.alive_ability_change_per_time.text()))
+        # self.species_table.setItem(13, self.species_items, QTableWidgetItem(self.fecundity_attenuation.text()))
+        # self.species_table.setItem(14, self.species_items, QTableWidgetItem(self.climate_type.currentText()))
+        # self.species_table.setItem(15, self.species_items, QTableWidgetItem(self.carrying_capacity.text()))
+        # self.species_table.setItem(16, self.species_items, QTableWidgetItem(self.carrying_cap_std.text()))
+        # self.species_table.setItem(17, self.species_items, QTableWidgetItem(self.hunger_increment.text()))
+        # self.species_table.setItem(18, self.species_items, QTableWidgetItem(self.age_increment.text()))
+        # self.species_table.setItem(19, self.species_items, QTableWidgetItem(str(self.monogamous.isChecked())))
+        # self.species_table.setItem(19, self.species_items, QTableWidgetItem(str(self.is_cellular.isChecked())))
+        # self.species_table.setItem(20, self.species_items, QTableWidgetItem(self.cell_neighbors_occupy.text()))
+        # self.species_table.setItem(21, self.species_items, QTableWidgetItem(self.simulation_years.text()))
+        # self.species_table.setItem(22, self.species_items, QTableWidgetItem(self.mr_grid_widget.get_map_name()))
+        # self.species_items += 1
 
     def reset_result_table(self):
         self.result_table.setColumnCount(2)
@@ -60,7 +82,7 @@ class UpdatePanel:
         self.result_items = 0
 
     def reset_species_table(self):
-        self.species_table.setRowCount(len(self.specie_table_rowname))
+        self.species_table.setRowCount(self.specie_table_length)
         self.species_table.setColumnCount(0)
         self.species_table.setVerticalHeaderLabels(self.specie_table_rowname)
         self.species_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)

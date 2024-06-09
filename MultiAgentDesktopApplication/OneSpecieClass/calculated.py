@@ -60,8 +60,8 @@ class Calculate(MathmaticsModel):
                 for j in range(self.species_table.rowCount()):
                     result['prey'][self.specie_table_rowname[j]] = self.species_table.item(j,i).text()
 
-        total_time = result['target specie']['simulation months']
-        self.specie_dict = {'target_specie': {'population': result['target specie']['initial population']}}
+        total_time = result['target specie'][self.simulation_years.objectName()]
+        self.specie_dict = {'target_specie': {'population': result['target specie'][self.initial_population.objectName()]}}
 
         self.model = EnvModel(self)
         for time in range(int(total_time)):

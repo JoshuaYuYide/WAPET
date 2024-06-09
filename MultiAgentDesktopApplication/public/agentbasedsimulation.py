@@ -30,23 +30,24 @@ class Animal(MathmaticsModel):
         self.partner = None
         self.position = [-1, -1]
         self.hunger = 100
-        self.move_speed_mean = float(params['speed mean'])
-        self.move_speed_std = float(params['speed std'])
+        self.move_speed_mean = float(params[self.model.widget_obj.move_speed_mean.objectName()])
+        self.move_speed_std = float(params[self.model.widget_obj.move_speed_std.objectName()])
         self.is_married = False
-        self.increase_rate = float(params['growth rate'])
-        self.life_time = float(params['maximum age'])
+        self.increase_rate = float(params[self.model.widget_obj.growth_rate.objectName()])
+        self.life_time = float(params[self.model.widget_obj.natural_life_span.objectName()])
         self.is_alive = True
-        self.married_min_age = float(params['marriage age'])
-        self.fertility_change = float(params['fecundity attenuation'])
-        self.alive_ability_change_per_time = float(params['alive ability change rate'])
-        self.attack_ability = float(params['attack ability'])
-        self.escape_ability = float(params['escape ability'])
-        self.hunger_increment = float(params['hunger increment'])
-        self.age_increment = 1
-        self.monogamous = True
+        self.married_min_age = float(params[self.model.widget_obj.marriage_age.objectName()])
+        self.fertility_change = float(params[self.model.widget_obj.fecundity_attenuation.objectName()])
+        self.alive_ability_change_per_time = float(params[self.model.widget_obj.alive_ability_change_per_time.objectName()])
+        self.attack_ability = float(params[self.model.widget_obj.attack_ability.objectName()])
+        self.escape_ability = float(params[self.model.widget_obj.escape_ability.objectName()])
+        self.hunger_increment = float(params[self.model.widget_obj.hunger_increment.objectName()])
 
-        self.cell_neighbors_occupy = 3
-        self.is_cellular = True
+        self.age_increment = float(params[self.model.widget_obj.age_increment.objectName()])
+        self.monogamous = params[self.model.widget_obj.monogamous.objectName()]
+
+        self.cell_neighbors_occupy = float(params[self.model.widget_obj.cell_neighbors_occupy.objectName()])
+        self.is_cellular = params[self.model.widget_obj.is_cellular.objectName()]
 
     def is_live(self):
         if self.hunger <= 0 or self.age > self.life_time:

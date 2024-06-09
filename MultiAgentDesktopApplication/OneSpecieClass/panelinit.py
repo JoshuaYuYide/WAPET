@@ -173,6 +173,7 @@ class PanelInit():
         self.carrying_capacity.setClearButtonEnabled(True)
         self.carrying_capacity.setText("10")
         self.carrying_cap_std = QLineEdit()
+        self.carrying_cap_std.setObjectName("carrying capacity std")
         self.carrying_cap_std.setClearButtonEnabled(True)
         self.carrying_cap_std.setText("1")
         self.climate_type = QComboBox()
