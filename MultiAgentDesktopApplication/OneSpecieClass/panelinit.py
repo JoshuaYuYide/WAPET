@@ -10,7 +10,9 @@ from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBo
 
 class PanelInit():
     def __init__(self):
-        pass
+        # self.leftmost_element()
+        self.left_element()
+        # self.right_element()
 
     def leftmost_element(self):
         self.species_table_title = QLabel("Species Data Table")
@@ -82,51 +84,79 @@ class PanelInit():
         # specie data management
         self.species = QComboBox()
         self.species.addItem("target specie")
+        self.species.setObjectName("species")
         self.name = QLineEdit()
+        self.name.setObjectName("name")
         self.name.setClearButtonEnabled(True)
         self.name.setText('fish')
         self.survival_rate = QLineEdit()
+        self.survival_rate.setObjectName("survival rate")
         self.survival_rate.setClearButtonEnabled(True)
         self.survival_rate.setText("10000")
         self.fecundity = QLineEdit()
+        self.fecundity.setObjectName("fecundity")
         self.fecundity.setClearButtonEnabled(True)
         self.fecundity.setText("10000")
         self.initial_population = QLineEdit()
+        self.initial_population.setObjectName("initial population")
         self.initial_population.setClearButtonEnabled(True)
         self.initial_population.setText("100")
         self.growth_rate = QLineEdit()
+        self.growth_rate.setObjectName("growth rate")
         self.growth_rate.setClearButtonEnabled(True)
         self.growth_rate.setText("0.1")
         self.natural_life_span = QLineEdit()
+        self.natural_life_span.setObjectName("maximum age")
         self.natural_life_span.setClearButtonEnabled(True)
         self.natural_life_span.setText("100")
         self.move_speed_mean = QLineEdit()
+        self.move_speed_mean.setObjectName("speed mean")
         self.move_speed_mean.setClearButtonEnabled(True)
         self.move_speed_mean.setText("2")
         self.move_speed_std = QLineEdit()
+        self.move_speed_std.setObjectName("speed std")
         self.move_speed_std.setClearButtonEnabled(True)
         self.move_speed_std.setText("1")
         self.marriage_age = QLineEdit()
+        self.marriage_age.setObjectName("marriage age")
         self.marriage_age.setClearButtonEnabled(True)
         self.marriage_age.setText("20")
         self.attack_ability = QLineEdit()
+        self.attack_ability.setObjectName("attack ability")
         self.attack_ability.setClearButtonEnabled(True)
         self.attack_ability.setText("0.1")
         self.escape_ability = QLineEdit()
+        self.escape_ability.setObjectName("escape ability")
         self.escape_ability.setClearButtonEnabled(True)
         self.escape_ability.setText("0.1")
         self.alive_ability_change_per_time = QLineEdit()
+        self.alive_ability_change_per_time.setObjectName("alive ability change rate")
         self.alive_ability_change_per_time.setClearButtonEnabled(True)
         self.alive_ability_change_per_time.setText("0.1")
         self.fecundity_attenuation = QLineEdit()
+        self.fecundity_attenuation.setObjectName("fecundity attenuation")
         self.fecundity_attenuation.setClearButtonEnabled(True)
         self.fecundity_attenuation.setText("-0.000001")
         self.hunger_increment = QLineEdit()
+        self.hunger_increment.setObjectName("hunger increment")
         self.hunger_increment.setClearButtonEnabled(True)
         self.hunger_increment.setText("10")
         self.monogamous = QCheckBox()
         self.monogamous.setText("Monogamous")
         self.monogamous.setChecked(True)
+        self.monogamous.setObjectName("monogamous")
+        self.age_increment = QLineEdit()
+        self.age_increment.setObjectName("age increment")
+        self.age_increment.setClearButtonEnabled(True)
+        self.age_increment.setText("1")
+        self.cell_neighbors_occupy = QLineEdit()
+        self.cell_neighbors_occupy.setObjectName("cell neighbors occupy")
+        self.cell_neighbors_occupy.setClearButtonEnabled(True)
+        self.cell_neighbors_occupy.setText("1")
+        self.is_cellular = QCheckBox()
+        self.is_cellular.setText("Cellular Automata")
+        self.is_cellular.setChecked(True)
+        self.is_cellular.setObjectName("is cellular")
 
         # specie operation
         self.species_submit_bt = QPushButton("Submit")
@@ -139,6 +169,7 @@ class PanelInit():
 
         # environment data management
         self.carrying_capacity = QLineEdit()
+        self.carrying_capacity.setObjectName("carrying capacity")
         self.carrying_capacity.setClearButtonEnabled(True)
         self.carrying_capacity.setText("10")
         self.carrying_cap_std = QLineEdit()
@@ -146,7 +177,9 @@ class PanelInit():
         self.carrying_cap_std.setText("1")
         self.climate_type = QComboBox()
         self.climate_type.addItem("tropical rain forest climate")
+        self.climate_type.setObjectName("climate type")
         self.simulation_years = QLineEdit()
+        self.simulation_years.setObjectName("simulation step")
         self.simulation_years.setClearButtonEnabled(True)
         self.simulation_years.setText("100")
 
@@ -234,7 +267,6 @@ class PanelInit():
         self.specie_survive_layout.addWidget(QLabel("hunger increment:"), 3, 0)
         self.specie_survive_layout.addWidget(self.hunger_increment, 3, 1)
 
-
         self.specie_population_setting_group = QGroupBox("Population Settings")
         self.specie.addWidget(self.specie_population_setting_group)
         self.specie_population_setting_layout = QGridLayout()
@@ -243,9 +275,12 @@ class PanelInit():
         self.specie_population_setting_layout.addWidget(self.growth_rate, 0, 1)
         self.specie_population_setting_layout.addWidget(QLabel("init population:"), 0, 2)
         self.specie_population_setting_layout.addWidget(self.initial_population, 0, 3)
-        self.specie_population_setting_layout.addWidget(self.monogamous, 1, 0)
-
-
+        self.specie_population_setting_layout.addWidget(QLabel("age increment:"), 1, 0)
+        self.specie_population_setting_layout.addWidget(self.age_increment, 1, 1)
+        self.specie_population_setting_layout.addWidget(QLabel("cell neighbors occupy:"), 1, 2)
+        self.specie_population_setting_layout.addWidget(self.cell_neighbors_occupy, 1, 3)
+        self.specie_population_setting_layout.addWidget(self.monogamous, 2, 0)
+        self.specie_population_setting_layout.addWidget(self.is_cellular, 2, 1)
 
         self.specie_operation = QHBoxLayout()
         self.specie_operation.addWidget(self.species_submit_bt)
@@ -474,6 +509,9 @@ class GridWidget(QWidget):
                 if new_key in list(self.colors.keys()):
                     self.grid[y][x] = f'{specie_name}_{x}_{y}'
                     self.update()
+
+    def objectName(self):
+        return 'map'
 
         # painter = QPainter(self)
         # color = self.colors[specie_type]

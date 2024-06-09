@@ -116,7 +116,10 @@ class MathmaticsModel:
                 return False
 
     # species cellular automata model
-    def cellular_automata(self, map, specie, candidate_position, cell_num, is_cellular):
+    def cellular_automata(self, map, start, specie, candidate_position, cell_num, is_cellular):
+        if len(candidate_position) == 1:
+            return candidate_position[0]
+
         if is_cellular:
             candidate_position_prob = [0] * len(candidate_position)
 
@@ -132,9 +135,15 @@ class MathmaticsModel:
                 if specie_neighbors_count < cell_num:
                     candidate_position_prob[pos] = 0
 
+
             total_population = sum(candidate_position_prob)
-            specie_neighbors_count = list(map(lambda x: x / total_population, candidate_position_prob))
-            chosen_item = random.choices(candidate_position, candidate_position_prob, k=1)[0]
+            # specie_neighbors_count = list(map(lambda x: x / total_population, candidate_position_prob))
+            if total_population == 0:
+                return start
+
+            candidate_position_prob = np.array(candidate_position_prob) / total_population
+            chosen_item = random.choices(candidate_position, list(candidate_position_prob), k=1)[0]
+            # chosen_item = np.random.choice(candidate_position, p=candidate_position_prob)
         else:
             chosen_item = random.choices(candidate_position, k=1)[0]
         return chosen_item
@@ -179,4 +188,4 @@ class MathmaticsModel:
         if len(candidate_position) == 0:
             return start
         else:
-            return self.cellular_automata(map, specie, candidate_position, cell_num, is_cellular)
+            return self.cellular_automata(map, start, specie, candidate_position, cell_num, is_cellular)

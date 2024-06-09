@@ -21,6 +21,7 @@ from OneSpecieClass.calculated import Calculate
 class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calculate):
     def __init__(self):
         super().__init__()
+        PanelInit.__init__(self)
         UpdatePanel.__init__(self)
 
         self.time = 0
@@ -71,6 +72,7 @@ class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calc
         self.mr_generate_bt.clicked.connect(self.check_disable_specie_data)
         self.mr_button_box.stateChanged.connect(self.check_disable_specie_data)
         self.climate_type.currentIndexChanged.connect(self.check_disable_specie_data)
+        self.is_cellular.stateChanged.connect(self.check_cell_neighbor)
 
         self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 'empty'))
         self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 'inaccessible'))

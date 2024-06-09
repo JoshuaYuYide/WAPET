@@ -42,9 +42,9 @@ class Animal(MathmaticsModel):
         self.attack_ability = float(params['attack ability'])
         self.escape_ability = float(params['escape ability'])
         self.hunger_increment = float(params['hunger increment'])
-
-        self.monogamous = True
         self.age_increment = 1
+        self.monogamous = True
+
         self.cell_neighbors_occupy = 3
         self.is_cellular = True
 

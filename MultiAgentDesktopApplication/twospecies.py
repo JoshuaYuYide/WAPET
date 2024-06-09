@@ -21,6 +21,7 @@ from OneSpecieClass.calculated import Calculate
 class TwoSpecies(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calculate):
     def __init__(self):
         super().__init__()
+        PanelInit.__init__(self)
         UpdatePanel.__init__(self)
 
         self.time = 0

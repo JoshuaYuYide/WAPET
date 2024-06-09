@@ -10,13 +10,22 @@ from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBo
 
 class UpdatePanel:
     def __init__(self):
-        self.specie_table_rowname = ["species", "name", "survival rate", "fecundity",
-                                                    "initial population", "growth rate",
-                                                    "maximum age", "speed mean", "speed std", "marriage age",
-                                                    "attack ability", "escape ability", "alive ability change rate",
-                                                    "fecundity attenuation", "climate type", "carrying capacity",
-                                                    "hunger increment",
-                                                    "simulation months", "map"]
+        # self.specie_table_rowname = ["species", "name", "survival rate", "fecundity",
+        #                              "initial population", "growth rate",
+        #                              "maximum age", "speed mean", "speed std", "marriage age",
+        #                              "attack ability", "escape ability", "alive ability change rate",
+        #                              "fecundity attenuation", "climate type", "carrying capacity",
+        #                              "hunger increment",
+        #                              "simulation step", "map"]
+        self.specie_table_rowname =[self.species.objectName(), self.name.objectName(), self.survival_rate.objectName(),
+                                    self.fecundity.objectName(), self.initial_population.objectName(),
+                                    self.growth_rate.objectName(), self.natural_life_span.objectName(),
+                                    self.move_speed_mean.objectName(), self.move_speed_std.objectName(),
+                                    self.marriage_age.objectName(), self.attack_ability.objectName(),
+                                    self.escape_ability.objectName(), self.alive_ability_change_per_time.objectName(),
+                                    self.fecundity_attenuation.objectName(), self.climate_type.objectName(),
+                                    self.carrying_capacity.objectName(), self.hunger_increment.objectName(),
+                                    self.simulation_years.objectName(), self.mr_grid_widget.objectName()]
         self.inaccessible_list = []
 
     @Slot()
@@ -80,6 +89,10 @@ class UpdatePanel:
         self.fecundity_attenuation.clear()
         self.climate_type.setCurrentIndex(0)
         self.simulation_years.clear()
+        self.hunger_increment.clear()
+        self.age_increment.clear()
+        self.cell_neighbors_occupy.clear()
+        self.carrying_cap_std.clear()
 
     @Slot()
     def random_species_func(self):
@@ -160,3 +173,5 @@ class UpdatePanel:
     def clear_plot(self):
         while self.right_plot.count() > 0:
             self.right_plot.removeTab(0)
+
+

@@ -60,3 +60,16 @@ class Check:
             self.clear_plot_bt.setEnabled(True)
         else:
             self.clear_plot_bt.setEnabled(False)
+
+    @Slot()
+    def check_cell_neighbor(self):
+        if self.is_cellular.isChecked():
+            self.cell_neighbors_occupy.setEnabled(True)
+        else:
+            self.cell_neighbors_occupy.setEnabled(False)
+
+
+
+
+
+
