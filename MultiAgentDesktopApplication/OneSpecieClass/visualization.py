@@ -169,7 +169,7 @@ class Visulization:
             return
 
         age_unique = list(age.keys())
-        age_unique = list(map(lambda x: int(x), age_unique))
+        age_unique = list(map(lambda x: float(x), age_unique))
         age_unique.sort()
         Q1 = np.percentile(age_unique, 25)
         Q2 = np.percentile(age_unique, 50)

@@ -445,7 +445,7 @@ class EnvModel(Model):
             self.specie_dict[specie]['population'] = 0
 
         for agent in self.schedule.agents:
-            if isinstance(agent, self.statistics[specie]):
+            if isinstance(agent, self.statistics[specie]) and agent.is_alive:
                 self.specie_dict[specie]['population'] += 1
 
 
