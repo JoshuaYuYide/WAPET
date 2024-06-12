@@ -77,7 +77,7 @@ class UpdatePanel:
     def reset_result_table(self):
         self.result_table.setColumnCount(2)
         self.result_table.setRowCount(0)
-        self.result_table.setVerticalHeaderLabels(["target population", "timestep"])
+        self.result_table.setHorizontalHeaderLabels(["target population", "timestep"])
         self.result_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.result_items = 0
 

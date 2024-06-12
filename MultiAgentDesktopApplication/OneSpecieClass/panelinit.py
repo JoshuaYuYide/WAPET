@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QCheckBox, QTabWidget, QGroupBox)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 
-class PanelInit():
+class PanelInit:
     def __init__(self):
         # self.leftmost_element()
         self.left_element()
@@ -83,7 +83,7 @@ class PanelInit():
 
         # specie data management
         self.species = QComboBox()
-        self.species.addItem("target specie")
+        self.species.addItem("target_specie")
         self.species.setObjectName("species")
         self.name = QLineEdit()
         self.name.setObjectName("name")
@@ -227,7 +227,7 @@ class PanelInit():
         # self.plot_map_thresholds.setText("10")
 
     def left_panel(self):
-        self.left_element()
+        # self.left_element()
 
         # specie data layout
         self.specie = QVBoxLayout()

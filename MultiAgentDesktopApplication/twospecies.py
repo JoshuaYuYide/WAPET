@@ -11,18 +11,18 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 
 from OneSpecieClass.help import Help
-from OneSpecieClass.panelinit import PanelInit, GridWidget
-from OneSpecieClass.visualization import Visulization
-from OneSpecieClass.check import Check
-from OneSpecieClass.updatepanel import UpdatePanel
-from OneSpecieClass.calculated import Calculate
+from TwoSpeciesClass.panelinit import PanelInitTwo, GridWidget
+from TwoSpeciesClass.visualization import VisulizationTwo
+from TwoSpeciesClass.check import CheckTwo
+from TwoSpeciesClass.updatepanel import UpdatePanelTwo
+from TwoSpeciesClass.calculated import CalculateTwo
 
 
-class TwoSpecies(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calculate):
+class TwoSpecies(QWidget, Help, PanelInitTwo, VisulizationTwo, CheckTwo, UpdatePanelTwo, CalculateTwo):
     def __init__(self):
         super().__init__()
-        PanelInit.__init__(self)
-        UpdatePanel.__init__(self)
+        PanelInitTwo.__init__(self)
+        UpdatePanelTwo.__init__(self)
 
         self.time = 0
 
