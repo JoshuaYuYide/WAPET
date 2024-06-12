@@ -73,6 +73,10 @@ class Animal(MathmaticsModel):
             escape_ability = self.age * self.alive_ability_change_per_time * self.escape_ability
         else:
             escape_ability = (self.age - self.married_min_age)**(1/2) * self.age * self.alive_ability_change_per_time * self.escape_ability
+        if escape_ability < 0:
+            escape_ability = 0
+        if escape_ability > 1:
+            escape_ability = 1
         return escape_ability
 
     def attack(self, prey_specie_name):
@@ -86,7 +90,7 @@ class Animal(MathmaticsModel):
             attack = np.random.choice(predator_attack, p = predator_attack_prob)
             if attack and not escape:
                 prey_agent.is_alive = False
-                self.model.soil_agent.delete_specie_on_soil(prey_agent)
+                self.model.soil_agent.delete_specie_on_soil(prey_agent, remove_schedule = False)
                 self.hunger += self.eat_volume
                 # self.model.soil_agent.map[self.position[0], self.position[1]]
                 return True
@@ -127,8 +131,8 @@ class Animal(MathmaticsModel):
             K = self.model.soil_agent.map[self.position[0], self.position[1]]['carry_ability']
             is_birth = self.logistic_growth_individual(N, K, self.increase_rate, self.fertility_change * (self.age - self.married_min_age))
             if is_birth:
-                new_agent_id = self.model.next_id
-                new_agent = TargetSpecieAgent(new_agent_id, self.model)
+                new_agent_id = self.model.get_next_id()
+                new_agent = self.new_agent_obj(new_agent_id, self.model)
                 new_agent.position = self.position
                 new_agent.parents = [self, self.partner]
                 new_agent.parents_count = 2
@@ -162,6 +166,9 @@ class TargetSpecieAgent(Agent, Animal):
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
         self.is_single = is_single
 
+    def new_agent_obj(self, id, model):
+        return TargetSpecieAgent(id, model, self.is_single)
+
     def step(self):
         if self.is_alive:
             self.move(self.model.soil_agent.map)
@@ -192,6 +199,9 @@ class PredatorAgent(Agent, Animal):
         Animal.__init__(self, self.specie_name)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
+    def new_agent_obj(self, id, model):
+        return PredatorAgent(id, model)
+
     def step(self):
         if self.is_alive:
             self.move(self.model.soil_agent.map)
@@ -214,6 +224,9 @@ class PreyAgent(Agent, Animal):
         self.specie_name = 'prey'
         Animal.__init__(self, self.specie_name)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
+
+    def new_agent_obj(self, id, model):
+        return PreyAgent(id, model)
 
     def step(self):
         if self.is_alive:
@@ -472,7 +485,6 @@ class EnvModel(Model):
             for specie_name in all_species_name:
                 if isinstance(agent, self.statistics[specie_name]) and agent.is_alive:
                     self.specie_dict[specie_name]['population'] += 1
-                    break
 
 
         # self.datacollector.collect(self)

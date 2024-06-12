@@ -9,7 +9,7 @@ class CheckTwo(Check):
         if self.species_table.columnCount() > 0:
             self.clear_table_bt.setEnabled(True)
             self.clear_table_bt.setEnabled(True)
-            if self.result_table.rowCount() == 0:
+            if self.result_table.rowCount() == 0 and self.species_table.columnCount() == 3:
                 self.simulate_bt.setEnabled(True)
             else:
                 self.simulate_bt.setEnabled(False)
