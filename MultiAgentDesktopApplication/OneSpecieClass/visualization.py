@@ -161,9 +161,9 @@ class Visulization:
         for agent in self.model.schedule.agents:
             if isinstance(agent, self.model.statistics[specie]) and agent.is_alive:
                 if agent.age not in list(age.keys()):
-                    age[str(agent.age)] = 1
+                    age[str(float(agent.age))] = 1
                 else:
-                    age[str(agent.age)] += 1
+                    age[str(float(agent.age))] += 1
 
         if len(age.keys()) == 0:
             return
