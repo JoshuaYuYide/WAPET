@@ -222,6 +222,14 @@ class PanelInit:
 
         self.plot_map_target_specie = QPushButton("Plot Target Specie Distribution")
         self.plot_map_carry_ability = QPushButton("Plot Carry Ability Distribution")
+
+        self.middle_right_plot_layout = QGridLayout()
+        self.middle_right_plot_layout.addWidget(QLabel("Plot on Map:"), 0, 0)
+        self.middle_right_plot_layout.addWidget(self.plot_map_target_specie, 0, 1)
+        self.middle_right_plot_layout.addWidget(self.plot_map_carry_ability, 0, 2)
+
+
+
         # self.plot_map_thresholds = QLineEdit()
         # self.plot_map_thresholds.setClearButtonEnabled(True)
         # self.plot_map_thresholds.setText("10")
@@ -357,10 +365,7 @@ class PanelInit:
         self.middle_right_button_layout.addWidget(self.mr_button_box)
         self.middle_right.addLayout(self.middle_right_button_layout)
 
-        self.middle_right_plot_layout = QHBoxLayout()
-        self.middle_right_plot_layout.addWidget(QLabel("Plot on Map:"))
-        self.middle_right_plot_layout.addWidget(self.plot_map_target_specie)
-        self.middle_right_plot_layout.addWidget(self.plot_map_carry_ability)
+
         self.middle_right.addLayout(self.middle_right_plot_layout)
 
 

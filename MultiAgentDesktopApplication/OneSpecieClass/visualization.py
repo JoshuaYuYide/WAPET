@@ -39,7 +39,7 @@ class Visulization:
         layout.addWidget(tree_view)
         tree_widget.setLayout(layout)
 
-        self.right_plot.addTab(tree_widget, "Tree")
+        self.right_plot.addTab(tree_widget, "Target Tree")
         self.plot_agent_based_logistic_individual()
         self.plot_gender_piechart()
         self.plot_age_piechart()
@@ -83,7 +83,6 @@ class Visulization:
     # 
     #     self.boxchart.setChart(chart)
     '''
-
 
     def plot_agent_based_logistic_individual(self):
         # Line Chart
@@ -342,14 +341,15 @@ class Visulization:
         self.mr_grid_widget.reset_color()
         specie_name = 'target_specie'
         total_amount = self.model.soil_agent.specie_amount[specie_name]
-        for y in range(int(self.mr_map_size.text())):
-            for x in range(int(self.mr_map_size.text())):
-                if not self.model.soil_agent.map[x][y]['is_inaccessible']:
-                    # alpha = (len(self.model.soil_agent.map[x][y]['target_specie']) / total_amount) * 255
-                    alpha = (len(self.model.soil_agent.map[x][y][specie_name]) / total_amount)
-                    self.mr_grid_widget.update_alpha(specie_name, alpha, [x,y])
+        if total_amount != 0:
+            for y in range(int(self.mr_map_size.text())):
+                for x in range(int(self.mr_map_size.text())):
+                    if not self.model.soil_agent.map[x][y]['is_inaccessible']:
+                        # alpha = (len(self.model.soil_agent.map[x][y]['target_specie']) / total_amount) * 255
+                        alpha = (len(self.model.soil_agent.map[x][y][specie_name]) / total_amount)
+                        self.mr_grid_widget.update_alpha(specie_name, alpha, [x,y])
 
-        self.mr_grid_widget.draw_species(specie_name)
+            self.mr_grid_widget.draw_species(specie_name)
 
     @Slot()
     def plot_carry_on_map(self):

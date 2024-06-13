@@ -81,6 +81,8 @@ class TwoSpecies(QWidget, Help, PanelInitTwo, VisulizationTwo, CheckTwo, UpdateP
         self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 'empty'))
         self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 'inaccessible'))
         self.plot_map_target_specie.clicked.connect(self.plot_target_specie_on_map)
+        self.plot_map_predator.clicked.connect(self.plot_predator_on_map)
+        self.plot_map_prey.clicked.connect(self.plot_prey_on_map)
         self.plot_map_carry_ability.clicked.connect(self.plot_carry_on_map)
 
         self.right_plot.currentChanged.connect(self.check_plot)
