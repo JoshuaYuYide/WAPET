@@ -4,10 +4,11 @@ import numpy as np
 import random
 from scipy.stats import norm
 
+
 class MathmaticsModel:
-    def __init__(self):
+    def __init__(self, random_seed):
         # self.cell_neighbors_occupy = cell_neighbors_occupy
-        pass
+        self.random_seed = random_seed
 
     def LefkovitchMatrix(self, years):
         # 定义阶段的生存率和转换概率
@@ -68,6 +69,7 @@ class MathmaticsModel:
         :param r: the intrinsic growth rate
         :return: the change of the individual growth and eating
         """
+        random.seed(self.random_seed)
         if K == 0:
             return False
         if is_eat:
@@ -105,6 +107,7 @@ class MathmaticsModel:
         N : list
             时间序列中的种群大小。
         """
+        np.random.seed(self.random_seed)
         current_population = N0
         new_population = 0
         for _ in range(current_population):
@@ -117,6 +120,7 @@ class MathmaticsModel:
 
     # species cellular automata model
     def cellular_automata(self, map, start, specie, candidate_position, cell_num, is_cellular):
+        random.seed(self.random_seed)
         if len(candidate_position) == 1:
             return candidate_position[0]
 

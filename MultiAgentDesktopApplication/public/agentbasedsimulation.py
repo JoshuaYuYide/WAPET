@@ -8,10 +8,12 @@ import random
 from collections import Counter
 
 class Animal(MathmaticsModel):
-    def __init__(self, specie):
+    def __init__(self, specie, random_seed):
         self.classification = 'animal'
         self.specie = specie
-        MathmaticsModel.__init__(self)
+        self.random_seed = random_seed
+        random.seed(self.random_seed)
+        MathmaticsModel.__init__(self, self.random_seed)
 
         rownames = self.model.widget_obj.specie_table_rowname
         params = {}
@@ -20,7 +22,6 @@ class Animal(MathmaticsModel):
                 params[rownames[row]] = self.model.widget_obj.species_table.item(row, column).text()
             if params['species'] == self.specie:
                 break
-
         self.age = random.randint(0, 10)
         self.gender = random.choice(['male', 'female'])
         self.kids = []
@@ -80,6 +81,8 @@ class Animal(MathmaticsModel):
         return escape_ability
 
     def attack(self, prey_specie_name):
+        random.seed(self.random_seed)
+        np.random.seed(self.random_seed)
         if len(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name]) > 0:
             prey_agent = random.choice(self.model.soil_agent.map[self.position[0], self.position[1]][prey_specie_name])
             prey_escape = [True, False]
@@ -149,6 +152,7 @@ class Animal(MathmaticsModel):
                 self.model.new_agents_dict[self.specie] += 1
 
     def move(self, map):
+        random.seed(self.random_seed)
         self.model.soil_agent.delete_specie_on_soil(self)
         self.position = self.random_walk(self.specie, self.move_speed_mean, self.move_speed_std, self.position, map, self.cell_neighbors_occupy, self.is_cellular)
         self.model.soil_agent.add_specie_on_soil(self, self.position)
@@ -161,8 +165,9 @@ class Animal(MathmaticsModel):
 class TargetSpecieAgent(Agent, Animal):
     def __init__(self, unique_id, model, is_single = True):
         super().__init__(unique_id, model)
+        self.random_seed = self.model.random_seed
         self.specie_name = 'target_specie'
-        Animal.__init__(self, self.specie_name)
+        Animal.__init__(self, self.specie_name, self.random_seed)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
         self.is_single = is_single
 
@@ -195,8 +200,9 @@ class TargetSpecieAgent(Agent, Animal):
 class PredatorAgent(Agent, Animal):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+        self.random_seed = self.model.random_seed
         self.specie_name = 'predator'
-        Animal.__init__(self, self.specie_name)
+        Animal.__init__(self, self.specie_name, self.random_seed)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
     def new_agent_obj(self, id, model):
@@ -221,8 +227,9 @@ class PredatorAgent(Agent, Animal):
 class PreyAgent(Agent, Animal):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+        self.random_seed = self.model.random_seed
         self.specie_name = 'prey'
-        Animal.__init__(self, self.specie_name)
+        Animal.__init__(self, self.specie_name, self.random_seed)
         self.eat_volume = 10  # the volume of food that the agent can eat at one time
 
     def new_agent_obj(self, id, model):
@@ -247,6 +254,8 @@ class ClimateAgent(Agent):
     # 季风气候、热带雨林气候、热带草原气候、热带沙漠气候、热带季风气候、热带雨林气候、热带草原气候、热带沙漠气候
     def __init__(self, unique_id, model, type):
         super().__init__(unique_id, model)
+        self.random_seed = self.model.random_seed
+        random.seed(self.random_seed)
         self.classification = 'climate'
         self.type = type
         self.climate_dict = {'sunshine': 0, 'wind': 0, 'rainfall': 0, 'cloudy': 0}
@@ -280,6 +289,7 @@ class ClimateAgent(Agent):
             self.climate_dict['cloudy'] = 0.1
 
     def step(self):
+        np.random.seed(self.random_seed)
         self.climate = np.random.choice(list(self.climate_dict.keys()), p = list(self.climate_dict.values()))
         # self.temperature = random.choice(self.temperature[self.weather]['temperature'], weights = self.temperature[self.weather]['prob'])
         # if self.climate == 'rainfall':
@@ -288,7 +298,9 @@ class ClimateAgent(Agent):
 class SoilAgent(Agent, MathmaticsModel):
     def __init__(self, unique_id, model):
         super().__init__(unique_id=unique_id, model=model)
-        MathmaticsModel.__init__(self)
+        self.random_seed = self.model.random_seed
+        MathmaticsModel.__init__(self, self.random_seed)
+        random.seed(self.random_seed)
         self.classification = 'soil'
         self.map_width = self.model.widget_obj.mr_grid_widget.grid_size
         self.map_height = self.model.widget_obj.mr_grid_widget.grid_size
@@ -405,6 +417,8 @@ class EnvModel(Model):
     def __init__(self, widget_obj, is_single = True):
         self.reset_next_id()
         self.widget_obj = widget_obj
+        self.random_seed = int(self.widget_obj.species_random_seed.text())
+        random.seed(self.random_seed)
         self.specie_dict = self.widget_obj.specie_dict
         self.schedule = mesa.time.SimultaneousActivation(self)
         soil_unique_id = self.get_next_id()
