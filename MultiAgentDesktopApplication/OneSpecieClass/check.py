@@ -70,6 +70,18 @@ class Check:
 
 
 
+    @Slot()
+    def check_random_seed_func(self):
+        if self.species_random_seed_check.isChecked():
+            self.species_random_seed.setEnabled(True)
+        else:
+            self.species_random_seed.setEnabled(False)
 
-
-
+    @Slot()
+    def check_save_dir(self):
+        if self.save_dir.text():
+            self.export_table.setEnabled(True)
+            self.export_plot.setEnabled(True)
+        else:
+            self.export_table.setEnabled(False)
+            self.export_plot.setEnabled(False)

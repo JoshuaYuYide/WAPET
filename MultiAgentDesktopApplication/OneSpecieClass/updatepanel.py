@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu, QCheckBox, QTabWidget)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
+import pandas as pd
 
 class UpdatePanel:
     def __init__(self):
@@ -195,5 +196,10 @@ class UpdatePanel:
     def clear_plot(self):
         while self.right_plot.count() > 0:
             self.right_plot.removeTab(0)
+
+
+    @Slot()
+    def export_table_func(self):
+
 
 

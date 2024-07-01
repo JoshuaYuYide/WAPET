@@ -164,7 +164,7 @@ class PanelInit:
         self.species_clear_bt = QPushButton("Clear")
         self.species_random_bt = QPushButton("Random")
         self.species_random_seed = QLineEdit()
-        self.species_random_seed.setClearButtonEnabled(True)
+        self.species_random_seed.setEnabled(False)
         self.species_random_seed.setText("0")
         self.species_random_seed_check = QCheckBox()
         self.species_random_seed_check.setText("Random Seed")
@@ -197,6 +197,9 @@ class PanelInit:
         self.plot_bt.setEnabled(False)
         self.export_table = QPushButton("Export Table")
         self.export_plot = QPushButton("Export Plot")
+        self.save_dir = QLineEdit()
+        self.save_dir.setFixedWidth(350)
+
 
         # landscape map
         self.mr_operation_layout = QHBoxLayout()
@@ -339,6 +342,8 @@ class PanelInit:
         self.operation_panel.addWidget(self.clear_plot_bt, 2, 1)
         self.operation_panel.addWidget(self.export_table, 3, 0)
         self.operation_panel.addWidget(self.export_plot, 3, 1)
+        self.operation_panel.addWidget(QLabel("save dir:"), 4, 0)
+        self.operation_panel.addWidget(self.save_dir, 4, 1)
 
         self.left = QVBoxLayout()
         self.left.addWidget(self.left_specie_title)

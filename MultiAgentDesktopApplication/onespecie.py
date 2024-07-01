@@ -73,6 +73,8 @@ class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calc
         self.mr_button_box.stateChanged.connect(self.check_disable_specie_data)
         self.climate_type.currentIndexChanged.connect(self.check_disable_specie_data)
         self.is_cellular.stateChanged.connect(self.check_cell_neighbor)
+        self.species_random_seed_check.stateChanged.connect(self.check_random_seed_func)
+        self.save_dir.textChanged.connect(self.check_save_dir)
 
         self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 'empty'))
         self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 'inaccessible'))
