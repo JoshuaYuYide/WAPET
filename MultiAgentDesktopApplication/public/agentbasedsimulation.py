@@ -280,7 +280,6 @@ class ClimateAgent(Agent):
         # 计算自定义横坐标对应的概率密度函数值
         #pdf = (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
 
-
     def climate_style_init(self):
         if self.type == 'tropical rain forest climate':
             self.climate_dict['sunshine'] = 0.3
@@ -410,8 +409,6 @@ class SoilAgent(Agent, MathmaticsModel):
         # for specie in list(self.specie_list):
         #     self.specie_occupy(specie)
         self.change_soil_carry_ability()
-
-
 
 class EnvModel(Model):
     def __init__(self, widget_obj, is_single = True):

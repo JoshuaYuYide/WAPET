@@ -166,6 +166,9 @@ class PanelInit:
         self.species_random_seed = QLineEdit()
         self.species_random_seed.setClearButtonEnabled(True)
         self.species_random_seed.setText("0")
+        self.species_random_seed_check = QCheckBox()
+        self.species_random_seed_check.setText("Random Seed")
+        self.species_random_seed_check.setChecked(False)
 
         # environment data management
         self.carrying_capacity = QLineEdit()
@@ -297,6 +300,8 @@ class PanelInit:
         self.specie_operation.addWidget(self.species_random_bt)
         self.specie_operation.addWidget(QLabel("random seed:"))
         self.specie_operation.addWidget(self.species_random_seed)
+        self.specie_operation.addWidget(self.species_random_seed_check)
+
 
         # environment layout
         self.env_data = QGridLayout()
