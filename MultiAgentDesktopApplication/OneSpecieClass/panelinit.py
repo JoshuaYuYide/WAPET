@@ -197,8 +197,8 @@ class PanelInit:
         self.plot_bt.setEnabled(False)
         self.export_table = QPushButton("Export Table")
         self.export_plot = QPushButton("Export Plot")
-        self.save_dir = QLineEdit()
-        self.save_dir.setFixedWidth(350)
+        # self.save_dir = QLineEdit()
+        # self.save_dir.setFixedWidth(350)
 
 
         # landscape map
@@ -342,8 +342,8 @@ class PanelInit:
         self.operation_panel.addWidget(self.clear_plot_bt, 2, 1)
         self.operation_panel.addWidget(self.export_table, 3, 0)
         self.operation_panel.addWidget(self.export_plot, 3, 1)
-        self.operation_panel.addWidget(QLabel("save dir:"), 4, 0)
-        self.operation_panel.addWidget(self.save_dir, 4, 1)
+        # self.operation_panel.addWidget(QLabel("save dir:"), 4, 0)
+        # self.operation_panel.addWidget(self.save_dir, 4, 1)
 
         self.left = QVBoxLayout()
         self.left.addWidget(self.left_specie_title)

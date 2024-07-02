@@ -287,12 +287,10 @@ class UpdatePanel:
 
     @Slot()
     def export_plot_func(self):
-        save_dir = self.save_dir.text()
-        if save_dir:
-            for i in range(self.right_plot.count()):
-                plot_name = self.right_plot.widget(i)
-                if isinstance(plot_name, QChartView):
-                    self.save_plotting(plot_name, save_dir, "Save Plot No.%s" % str(i))
-        else:
-            QMessageBox.critical(self, "Error", "Please input the save directory.")
+        for i in range(self.right_plot.count()):
+            plot_name = self.right_plot.widget(i)
+            if isinstance(plot_name, QChartView):
+                self.save_plotting(plot_name, "", "Save Plot No.%s" % str(i))
+        # else:
+        #     QMessageBox.critical(self, "Error", "Please input the save directory.")
 
