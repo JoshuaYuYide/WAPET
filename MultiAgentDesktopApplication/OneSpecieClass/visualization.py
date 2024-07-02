@@ -202,9 +202,10 @@ class Visulization:
 
     def plot_gender_piechart(self):
         # Pie Chart
+        caption = "Age Pie Chart"
         chart = QChart()
         series = QPieSeries()
-        series.setName("Age Pie Chart")
+        series.setName(caption)
 
         specie = 'target_specie'
         gender = {}
@@ -226,6 +227,7 @@ class Visulization:
         # 设置图例的位置
         chart.legend().setAlignment(Qt.AlignLeft)
         self.piechart_gender.setChart(chart)
+
 
     def plot_life_status_piechart(self):
         chart = QChart()

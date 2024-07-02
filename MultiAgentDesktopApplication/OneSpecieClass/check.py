@@ -51,15 +51,19 @@ class Check:
 
         if self.result_table.rowCount() > 0:
             self.plot_bt.setEnabled(True)
+            self.export_table.setEnabled(True)
         else:
             self.plot_bt.setEnabled(False)
+            self.export_table.setEnabled(False)
 
     @Slot()
     def check_plot(self):
         if self.right_plot.count() > 0:
             self.clear_plot_bt.setEnabled(True)
+            self.export_plot.setEnabled(True)
         else:
             self.clear_plot_bt.setEnabled(False)
+            self.export_plot.setEnabled(False)
 
     @Slot()
     def check_cell_neighbor(self):
@@ -77,11 +81,11 @@ class Check:
         else:
             self.species_random_seed.setEnabled(False)
 
-    @Slot()
-    def check_save_dir(self):
-        if self.save_dir.text():
-            self.export_table.setEnabled(True)
-            self.export_plot.setEnabled(True)
-        else:
-            self.export_table.setEnabled(False)
-            self.export_plot.setEnabled(False)
+    # @Slot()
+    # def check_save_dir(self):
+    #     if self.save_dir.text():
+    #         self.export_table.setEnabled(True)
+    #         self.export_plot.setEnabled(True)
+    #     else:
+    #         self.export_table.setEnabled(False)
+    #         self.export_plot.setEnabled(False)

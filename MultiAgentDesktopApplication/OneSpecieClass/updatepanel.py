@@ -1,11 +1,13 @@
 import random
 import sys
 from PySide6.QtCore import Qt, Slot, QPointF
-from PySide6.QtGui import QPainter, QGradient, QPen
+from PySide6.QtGui import QPainter, QGradient, QPen, QPixmap
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QHBoxLayout, QLineEdit, QMainWindow,
                                QPushButton, QTableWidget, QTableWidgetItem,
-                               QVBoxLayout, QWidget, QGridLayout, QLabel, QComboBox, QSlider, QMessageBox, QMenu, QCheckBox, QTabWidget)
+                               QVBoxLayout, QWidget, QGridLayout, QLabel,
+                               QComboBox, QSlider, QMessageBox, QMenu, QCheckBox,
+                               QTabWidget, QFileDialog)
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 import pandas as pd
 
@@ -201,5 +203,96 @@ class UpdatePanel:
     @Slot()
     def export_table_func(self):
 
+        species_data = []
+        for i in range(self.species_table.columnCount()):
+            species_data.append([self.species_table.item(j, i).text() for j in range(self.species_table.rowCount())])
+        species_df = pd.DataFrame(species_data, columns=self.specie_table_rowname)
 
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,  # parent widget
+            "Save Species Table CSV",  # 对话框标题
+            "",  # 默认目录，空字符串表示使用上次的目录或默认目录
+            "CSV Files (*.csv);;All Files (*)"  # 文件类型过滤器
+        )
+
+        # 检查用户是否选择了文件路径
+        if file_path:
+            # 如果用户没有指定 .csv 扩展名，添加它
+            if not file_path.lower().endswith('.csv'):
+                file_path += '.csv'
+            # 保存 DataFrame 到选择的文件路径
+            species_df.to_csv(file_path, index=False)
+            print(f"Result saved to {file_path}")
+        else:
+            print("Save operation cancelled")
+
+        # -------------------------
+
+        result_data = []
+        for i in range(self.result_table.rowCount()):
+            result_data.append([self.result_table.item(i, 0).text(), self.result_table.item(i, 1).text()])
+        result_df = pd.DataFrame(result_data, columns=["target population", "timestep"])
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,  # parent widget
+            "Save Result Table CSV",  # 对话框标题
+            "",  # 默认目录，空字符串表示使用上次的目录或默认目录
+            "CSV Files (*.csv);;All Files (*)"  # 文件类型过滤器
+        )
+
+        # 检查用户是否选择了文件路径
+        if file_path:
+            # 如果用户没有指定 .csv 扩展名，添加它
+            if not file_path.lower().endswith('.csv'):
+                file_path += '.csv'
+            # 保存 DataFrame 到选择的文件路径
+            result_df.to_csv(file_path, index=False)
+            print(f"Result saved to {file_path}")
+        else:
+            print("Save operation cancelled")
+
+        #
+        #
+        # save_dir = self.save_dir.text()
+        # if save_dir:
+        #     species_data = []
+        #     for i in range(self.species_table.columnCount()):
+        #         species_data.append([self.species_table.item(j, i).text() for j in range(self.species_table.rowCount())])
+        #     species_df = pd.DataFrame(species_data, columns=self.specie_table_rowname)
+        #     species_df.to_csv(save_dir + "/species.csv", index=False)
+        #
+        #     result_data = []
+        #     for i in range(self.result_table.rowCount()):
+        #         result_data.append([self.result_table.item(i, 0).text(), self.result_table.item(i, 1).text()])
+        #     result_df = pd.DataFrame(result_data, columns=["target population", "timestep"])
+        #     result_df.to_csv(save_dir + "/result.csv", index=False)
+        #
+        # else:
+        #     QMessageBox.critical(self, "Error", "Please input the save directory.")
+
+    def save_plotting(self, plot_name, file_path, file_caption):
+        size = plot_name.size()
+        pixmap = QPixmap(size)
+        pixmap.fill(Qt.white)
+
+        painter = QPainter(pixmap)
+        self.piechart_gender.render(painter)
+        painter.end()
+
+        file_path, _ = QFileDialog.getSaveFileName(self, file_caption, file_path, "PNG Files (*.png);;All Files (*)")
+
+        if file_path:
+            pixmap.save(file_path, "PNG")
+            print(f"Chart saved to {file_path}")
+
+    @Slot()
+    def export_plot_func(self):
+        save_dir = self.save_dir.text()
+        if save_dir:
+            for i in range(self.right_plot.count()):
+                plot_name = self.right_plot.widget(i)
+                if isinstance(plot_name, QChartView):
+                    self.save_plotting(plot_name, save_dir, "Save Plot No.%s" % str(i))
+        else:
+            QMessageBox.critical(self, "Error", "Please input the save directory.")
 

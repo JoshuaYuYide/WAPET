@@ -52,6 +52,8 @@ class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calc
         self.mr_button_box.clicked.connect(self.confirm_map)
 
         self.simulate_bt.clicked.connect(self.simulate_one_specie_individual)
+        self.export_table.clicked.connect(self.export_table_func)
+        self.export_plot.clicked.connect(self.export_plot_func)
         # self.simulate.clicked.connect(self.simulate_logistic_growth_discrete_individual)
 
         # check
@@ -74,7 +76,7 @@ class OneSpecie(QWidget, Help, PanelInit, Visulization, Check, UpdatePanel, Calc
         self.climate_type.currentIndexChanged.connect(self.check_disable_specie_data)
         self.is_cellular.stateChanged.connect(self.check_cell_neighbor)
         self.species_random_seed_check.stateChanged.connect(self.check_random_seed_func)
-        self.save_dir.textChanged.connect(self.check_save_dir)
+        # self.save_dir.textChanged.connect(self.check_save_dir)
 
         self.mr_button_draw_1.clicked.connect(lambda: set_color(self.mr_grid_widget, 'empty'))
         self.mr_button_draw_2.clicked.connect(lambda: set_color(self.mr_grid_widget, 'inaccessible'))
