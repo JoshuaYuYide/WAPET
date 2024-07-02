@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtCore import Qt, Slot, QPointF
-from PySide6.QtGui import QPainter, QGradient, QPen, QColor
+from PySide6.QtGui import QPainter, QGradient, QPen, QColor, QPixmap
 from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
                                QHBoxLayout, QLineEdit, QMainWindow,
                                QPushButton, QTableWidget, QTableWidgetItem,
@@ -186,6 +186,9 @@ class PanelInit:
         self.simulation_years.setObjectName("simulation step")
         self.simulation_years.setClearButtonEnabled(True)
         self.simulation_years.setText("100")
+        self.extreme_climate_threshold = QLineEdit()
+        self.extreme_climate_threshold.setObjectName("extreme climate threshold")
+        self.extreme_climate_threshold.setText("10")
 
         self.simulate_bt = QPushButton("Simulate")
         self.simulate_bt.setEnabled(False)
@@ -288,14 +291,16 @@ class PanelInit:
         self.specie_population_setting_group.setLayout(self.specie_population_setting_layout)
         self.specie_population_setting_layout.addWidget(QLabel("growth rate:"), 0, 0)
         self.specie_population_setting_layout.addWidget(self.growth_rate, 0, 1)
-        self.specie_population_setting_layout.addWidget(QLabel("init population:"), 0, 2)
-        self.specie_population_setting_layout.addWidget(self.initial_population, 0, 3)
+        self.specie_population_setting_layout.addWidget(QLabel("extreme climate threshold:"), 0, 2)
+        self.specie_population_setting_layout.addWidget(self.extreme_climate_threshold, 0, 3)
         self.specie_population_setting_layout.addWidget(QLabel("age increment:"), 1, 0)
         self.specie_population_setting_layout.addWidget(self.age_increment, 1, 1)
         self.specie_population_setting_layout.addWidget(QLabel("cell neighbors occupy:"), 1, 2)
         self.specie_population_setting_layout.addWidget(self.cell_neighbors_occupy, 1, 3)
-        self.specie_population_setting_layout.addWidget(self.monogamous, 2, 0)
-        self.specie_population_setting_layout.addWidget(self.is_cellular, 2, 1)
+        self.specie_population_setting_layout.addWidget(QLabel("init population:"), 2, 0)
+        self.specie_population_setting_layout.addWidget(self.initial_population, 2, 1)
+        self.specie_population_setting_layout.addWidget(self.monogamous, 3, 0)
+        self.specie_population_setting_layout.addWidget(self.is_cellular, 3, 1)
 
         self.specie_operation = QHBoxLayout()
         self.specie_operation.addWidget(self.species_submit_bt)
@@ -528,6 +533,12 @@ class GridWidget(QWidget):
 
     def objectName(self):
         return 'map'
+
+    def render_to_pixmap(self):
+        pixmap = QPixmap(self.size())
+        pixmap.fill(Qt.white)  # 填充白色背景
+        self.render(pixmap)
+        return pixmap
 
         # painter = QPainter(self)
         # color = self.colors[specie_type]

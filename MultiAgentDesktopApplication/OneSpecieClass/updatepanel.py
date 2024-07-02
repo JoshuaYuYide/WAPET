@@ -270,14 +270,18 @@ class UpdatePanel:
         # else:
         #     QMessageBox.critical(self, "Error", "Please input the save directory.")
 
-    def save_plotting(self, plot_name, file_path, file_caption):
-        size = plot_name.size()
-        pixmap = QPixmap(size)
-        pixmap.fill(Qt.white)
-
-        painter = QPainter(pixmap)
-        self.piechart_gender.render(painter)
-        painter.end()
+    def save_plotting(self, plot_obj, file_path, file_caption):
+        if isinstance(plot_obj, QChartView):
+            size = plot_obj.size()
+            pixmap = QPixmap(size)
+            pixmap.fill(Qt.white)
+            painter = QPainter(pixmap)
+            plot_obj.render(painter)
+            painter.end()
+        else:
+            pixmap = QPixmap(self.size())
+            pixmap.fill(Qt.white)  # 填充白色背景
+            plot_obj.render(pixmap)
 
         file_path, _ = QFileDialog.getSaveFileName(self, file_caption, file_path, "PNG Files (*.png);;All Files (*)")
 
@@ -288,9 +292,9 @@ class UpdatePanel:
     @Slot()
     def export_plot_func(self):
         for i in range(self.right_plot.count()):
-            plot_name = self.right_plot.widget(i)
-            if isinstance(plot_name, QChartView):
-                self.save_plotting(plot_name, "", "Save Plot No.%s" % str(i))
+            plot_obj = self.right_plot.widget(i)
+            # if isinstance(plot_name, QChartView):
+            self.save_plotting(plot_obj, "", "Save Plot No.%s" % str(i))
         # else:
         #     QMessageBox.critical(self, "Error", "Please input the save directory.")
 

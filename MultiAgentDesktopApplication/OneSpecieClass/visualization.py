@@ -330,13 +330,13 @@ class Visulization:
                 current_gen_num += 1
         return root
 
-    def test(self):
-        kids = 0
-        alive = 0
-        for i in visited:
-            kids += i.kids_count
-            if i.is_alive:
-                alive += 1
+    # def test(self):
+    #     kids = 0
+    #     alive = 0
+    #     for i in visited:
+    #         kids += i.kids_count
+    #         if i.is_alive:
+    #             alive += 1
 
     @Slot()
     def plot_target_specie_on_map(self):

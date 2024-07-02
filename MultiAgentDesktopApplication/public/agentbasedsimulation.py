@@ -406,9 +406,10 @@ class SoilAgent(Agent, MathmaticsModel):
         self.climate_history.append(self.model.climate_agent.climate)
         frequency = Counter(self.climate_history)
         var = np.var(list(frequency.values()))
-        if var == 0 and len(self.climate_history) < 10:
+        threshold = int(self.model.widget_obj.extreme_climate_threshold.text())
+        if var == 0 and len(self.climate_history) < threshold:
             var = 1
-        elif var == 0 and len(self.climate_history) >= 10:
+        elif var == 0 and len(self.climate_history) >= threshold:
             var = 0.1
 
         for i in range(self.map_width):
