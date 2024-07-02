@@ -157,6 +157,12 @@ class PanelInit:
         self.is_cellular.setText("Cellular Automata")
         self.is_cellular.setChecked(True)
         self.is_cellular.setObjectName("is cellular")
+        self.init_min_age = QLineEdit()
+        self.init_min_age.setObjectName("init min age")
+        self.init_min_age.setText("0")
+        self.init_max_age = QLineEdit()
+        self.init_max_age.setObjectName("init min age")
+        self.init_max_age.setText("10")
 
         # specie operation
         self.species_submit_bt = QPushButton("Submit")
@@ -299,8 +305,12 @@ class PanelInit:
         self.specie_population_setting_layout.addWidget(self.cell_neighbors_occupy, 1, 3)
         self.specie_population_setting_layout.addWidget(QLabel("init population:"), 2, 0)
         self.specie_population_setting_layout.addWidget(self.initial_population, 2, 1)
-        self.specie_population_setting_layout.addWidget(self.monogamous, 3, 0)
-        self.specie_population_setting_layout.addWidget(self.is_cellular, 3, 1)
+        self.specie_population_setting_layout.addWidget(QLabel("init min age:"), 2, 2)
+        self.specie_population_setting_layout.addWidget(self.init_min_age, 2, 3)
+        self.specie_population_setting_layout.addWidget(QLabel("init max age:"), 3, 0)
+        self.specie_population_setting_layout.addWidget(self.init_max_age, 3, 1)
+        self.specie_population_setting_layout.addWidget(self.monogamous, 4, 0)
+        self.specie_population_setting_layout.addWidget(self.is_cellular, 4, 1)
 
         self.specie_operation = QHBoxLayout()
         self.specie_operation.addWidget(self.species_submit_bt)

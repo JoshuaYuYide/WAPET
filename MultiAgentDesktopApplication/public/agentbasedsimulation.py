@@ -25,7 +25,7 @@ class Animal(MathmaticsModel):
                 params[rownames[row]] = self.model.widget_obj.species_table.item(row, column).text()
             if params['species'] == self.specie:
                 break
-        self.age = random.randint(0, 10)
+        self.age = random.randint(int(self.model.widget_obj.init_min_age.text()), int(self.model.widget_obj.init_max_age.text()))
         self.gender = random.choice(['male', 'female'])
         self.kids = []
         self.kids_count = 0

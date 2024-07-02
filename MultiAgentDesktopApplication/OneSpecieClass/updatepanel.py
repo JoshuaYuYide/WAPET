@@ -27,8 +27,10 @@ class UpdatePanel:
                                     self.marriage_age, self.attack_ability,
                                     self.escape_ability, self.alive_ability_change_per_time,
                                     self.fecundity_attenuation, self.climate_type,
+                                    self.extreme_climate_threshold,
                                     self.carrying_capacity, self.carrying_cap_std,
                                     self.hunger_increment, self.age_increment,
+                                    self.init_min_age, self.init_max_age,
                                     self.monogamous, self.is_cellular,
                                     self.cell_neighbors_occupy, self.simulation_years,
                                     self.mr_grid_widget]
@@ -118,6 +120,9 @@ class UpdatePanel:
         self.age_increment.clear()
         self.cell_neighbors_occupy.clear()
         self.carrying_cap_std.clear()
+        self.extreme_climate_threshold.clear()
+        self.init_min_age.clear()
+        self.init_max_age.clear()
 
     @Slot()
     def random_species_func(self):
@@ -137,6 +142,11 @@ class UpdatePanel:
         self.fecundity_attenuation.setText(str(-round(random.random(), 2)))
         self.climate_type.setCurrentIndex(random.randint(0, 3))
         self.simulation_years.setText(str(random.randint(1, 100)))
+        self.extreme_climate_threshold.setText(str(random.randint(1, 100)))
+        self.hunger_increment.setText(str(random.randint(1, 100)))
+        self.age_increment.setText(str(random.randint(1, 100)))
+        self.init_min_age.setText(str(random.randint(1, 10)))
+        self.init_max_age.setText(str(random.randint(11, 100)))
 
     @Slot()
     def delete_species_func(self):
