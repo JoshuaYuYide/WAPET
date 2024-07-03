@@ -54,7 +54,7 @@ class PanelInit:
         return self.leftmost
 
     def left_element(self):
-        self.left_specie_title = QLabel("Species Data Management Panel (units of time: month)")
+        self.left_specie_title = QLabel("Species Data Management Panel")
         self.left_specie_title.setAlignment(Qt.AlignCenter)
         font = self.left_specie_title.font()
         font.setBold(True)
