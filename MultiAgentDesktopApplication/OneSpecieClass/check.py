@@ -18,6 +18,7 @@ class Check:
             self.move_speed_mean.text() and self.move_speed_std.text() and self.marriage_age.text() and
             self.attack_ability.text() and self.escape_ability.text() and self.alive_ability_change_per_time.text() and
             self.fecundity_attenuation.text() and self.mr_button_box.isChecked() and self.age_increment.text())
+        enabled = enabled and (not self.species_table.columnCount() > 0 and not self.result_table.rowCount() > 0)
         if enabled:
             self.species_submit_bt.setEnabled(True)
         else:
