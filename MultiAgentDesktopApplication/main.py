@@ -8,6 +8,8 @@ from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
 from PySide6.QtCharts import QChartView, QPieSeries, QChart, QBoxPlotSeries, QBoxSet, QLineSeries
 from onespecie import OneSpecie
 from twospecies import TwoSpecies
+import matplotlib
+matplotlib.use('Qt5Agg')
 
 
 if __name__ == "__main__":
