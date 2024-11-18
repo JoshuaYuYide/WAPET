@@ -1,8 +1,3 @@
-开发计划：
-1. 设计问题
-   （1）加入极限环境设计
-   （2）加入滑框对时间进行控制
-3. 参数问题
-4. 模型问题
-   （1）病毒传播模型
-   （2）人类接入
+Run the 'main.py' in the 'MultiAgentDesktopApplication' folder.
+
+This project connects to the paper named "An Open-source Dynamic Population Simulation Software for Alleviating Partial Observability in Species Richness Research".
